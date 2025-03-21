@@ -194,7 +194,7 @@ button:
             if (id(select_command_ec).state == "Calibrer @ val2 = 80000") {
               id(ec_ezo).send_custom("Cal,high,80000");
             }
-            if (id(select_command_ec).state == "Calibrer CLEAR") {
+            if (id(select_command_ec).state == "Suprim calibration") {
               id(ec_ezo).clear_calibration();
             }
             if (id(select_command_ec).state == "reinitialisation") {
@@ -232,7 +232,7 @@ select:
       - "Calibrer @ SEC"
       - "Calibrer @ val1 = 12880"
       - "Calibrer @ val2 = 80000"
-      - "Calibrer CLEAR"
+      - "Suprim calibration"
     initial_option: "Vérif Calibration"
     set_action:
       - logger.log:
