@@ -1,5 +1,5 @@
 substitutions:
-  name: "Reefmonitor"  # Nom technique de l'appareil
+  name: "reefmonitor"  # Nom technique de l'appareil
   friendly_name: "Reefmonitor"  # Nom convivial affiché dans l'interface utilisateur
   comment: "Reefmonitor ESP32 - Aquarium Controller & Monitor"  # Description précise de l'appareil
   project_name: "Twinsen68.Reefmonitor"  # Nom du projet pour identification ESPHome
