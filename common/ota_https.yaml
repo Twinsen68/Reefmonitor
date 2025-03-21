@@ -8,10 +8,10 @@ http_request:
   verify_ssl: false
 
 update:
-  - platform: http_request 
-    name: "reefmonitor Firmware Update"
+  - platform: http_request
+    name: AquaPi Firmware Update
     id: update_firmware_sensor
-    entity_category: "diagnostic"
+    entity_category: 'diagnostic'
     update_interval: ${ota_update_interval}
     icon: mdi:update
     resource: https://raw.githubusercontent.com/Twinsen68/reefmonitor/firmware/reefmonitor.manifest.json
@@ -21,7 +21,7 @@ update:
 button:
   - platform: template
     id: update_firmware
-    name: "Mettre à jour reefmonitor Firmware - Stable"
+    name: Update AquaPi Firmware - Stable
     entity_category: "config"
     icon: mdi:update
     disabled_by_default: true
