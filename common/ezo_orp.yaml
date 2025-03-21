@@ -58,7 +58,7 @@ sensor:
 
 text_sensor:
   - platform: template  # Résultat des commandes envoyées à la sonde ORP
-    name: ORP - Command Result
+    name: ORP - Valeur Cmd
     icon: mdi:data-matrix
     id: result_orp
     web_server:
