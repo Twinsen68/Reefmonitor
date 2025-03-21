@@ -1,6 +1,6 @@
 substitutions:
-  name: "Reefmonitor"  # Nom technique de l'appareil
-  friendly_name: "Reefmonitor"  # Nom convivial affiché à l'utilisateur
+  name: "reefmonitor"  # Nom technique de l'appareil
+  friendly_name: "reefmonitor"  # Nom convivial affiché à l'utilisateur
   logger: "DEBUG"  # Niveau de journalisation (DEBUG, INFO, etc.)
 
   # Définition des broches utilisées
