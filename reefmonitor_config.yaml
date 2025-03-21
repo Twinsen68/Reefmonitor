@@ -11,5 +11,5 @@ packages:  # Inclut des fichiers YAML externes pour modularité et réutilisatio
   ezo_orp: !include common/ezo_orp.yaml  # Intègre les sondes EZO pour le potentiel rédox (ORP).
   substitutions: !include common/substitutions.yaml  # Centralise les variables réutilisées entre les fichiers.
   temperature_dallas: !include common/temperature_dallas.yaml  # Référence répétée pour assurer la modularité.
-  ota_https: !include common/ota_https.yaml  # Active les mises à jour OTA (Over-The-Air) sécurisées via HTTPS.
+  #ota_https: !include common/ota_https.yaml  # Active les mises à jour OTA (Over-The-Air) sécurisées via HTTPS.
   debug: !include common/debug.yaml  # Inclut une configuration pour le débogage (logs détaillés, etc.).
