@@ -14,9 +14,6 @@ logger:  # Active les journaux pour surveiller l'état du périphérique.
 
 api:  # Active l'API ESPHome pour interagir avec Home Assistant.
 
-ota:  # Permet les mises à jour Over-The-Air.
-  - platform: !secret ota_password  # Utilise la plateforme OTA d'ESPHome.
-
 wifi:  # Configuration du Wi-Fi.
   ssid: "Votre_SSID"  # Nom du réseau principal.
   password: "Votre_Mot_De_Passe"  # Mot de passe du réseau principal.
