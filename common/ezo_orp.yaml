@@ -92,7 +92,7 @@ button:
     on_press:
       then:
         - lambda: |-
-            if (id(select_command_orp).state == "Read") {
+            if (id(select_command_orp).state == "Lire") {
               id(orp_ezo).send_custom("R");
             }
             // Get Device Firmware Version
@@ -102,13 +102,13 @@ button:
             if (id(select_command_orp).state == "Status") {
               id(orp_ezo).send_custom("Status");
             }
-            if (id(select_command_orp).state == "Check Calibration") {
+            if (id(select_command_orp).state == "Vérif calibration") {
               id(orp_ezo).get_calibration();
             }  
-            if (id(select_command_orp).state == "Calibrate @ 225 mV (WILL RESET CALIBRATION)") {
+            if (id(select_command_orp).state == "Calibration @ 225 mV ") {
               id(orp_ezo).send_custom("Cal,225");
             }
-            if (id(select_command_orp).state == "Calibrate CLEAR (WILL RESET CALIBRATION)") {
+            if (id(select_command_orp).state == "Supr Calibration") {
               id(orp_ezo).clear_calibration();
             }
             // else {
@@ -126,13 +126,13 @@ select:
     # disabled_by_default: true
     entity_category: "Config"
     options:
-      - "Read"
+      - "Lire"
       - "Information"
       - "Status"
-      - "Check Calibration"
-      - "Calibrate @ 225 mV (WILL RESET CALIBRATION)"
-      - "Calibrate CLEAR (WILL RESET CALIBRATION)"
-    initial_option: "Check Calibration"
+      - "Vérif calibration"
+      - "Calibration @ 225 mV "
+      - "Supr Calibration"
+    initial_option: "Vérif calibration"
     set_action:
       - logger.log:
           format: "Chosen option: %s"
