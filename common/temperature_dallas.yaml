@@ -1,150 +1,165 @@
 substitutions:
-  dallasPin: "16"  # GPIO utilisé pour connecter le bus 1-Wire des capteurs Dallas.
-  update_temp: "60s"  # Fréquence de mise à jour des capteurs de température.
-  
-  # Variables de calibration
-  # Calibration basée sur des points de référence : glace (0°C) et eau bouillante (100°C).
-  cal_0: "0.0"  # Température de référence basse (calibration à 0°C).
-  cal_100: "100.0"  # Température de référence haute (calibration à 100°C).
-  range_cool: "74"  # Température limite basse (par défaut 74°C, à adapter).
-  range_warm: "82"  # Température limite haute (par défaut 82°C, à adapter).
+  dallasPin: "16"
+  update_temp: "60s"
 
-# Capteur Dallas DS18B20
+  # Calibration variables
+  # 0C using Ice Water; 100C using Boiling Water  
+  # Calibration Temp. 1
+  cal_0: "0.0"
+  cal_100: "100.0"
+  range_cool: "74"
+  range_warm: "82"
+
+  sorting_group_temperature_weight: '10'
+
+web_server:
+  sorting_groups:
+    - id: sorting_group_temperature
+      name: "Temperature"
+      sorting_weight: ${sorting_group_temperature_weight}
+
+# 18B20 sensor Pin
 one_wire:
   - platform: gpio
-    pin: ${dallasPin}  # GPIO défini via substitution pour connecter les capteurs Dallas.
+    pin: ${dallasPin}
 
 sensor:
   # Temperature Probe 1
   - platform: dallas_temp
-    id: temp_1  # Identifiant unique pour ce capteur.
-    icon: mdi:thermometer-water  # Icône représentant la température de l'eau.
-    name: "Température"  # Nom affiché dans Home Assistant.
-    state_class: "measurement"  # Classe indiquant une mesure continue.
-    device_class: "temperature"  # Catégorie d'appareil : température.
-    update_interval: "${update_temp}"  # Fréquence de mise à jour définie dans les substitutions.
+    id: temp_1
+    icon: mdi:thermometer-water
+    name: "Temperature"
+    state_class: "measurement"
+    device_class: "temperature"
+    update_interval: "${update_temp}"
     filters:
       - calibrate_linear:
-          method: least_squares  # Méthode de calibration utilisant les moindres carrés.
+          method: least_squares
           datapoints:
-            - 0.0 -> ${cal_0}  # Calibration avec le point 0°C.
-            - 100.0 -> ${cal_100}  # Calibration avec le point 100°C.
+            - 0.0 -> ${cal_0}
+            - 100.0 -> ${cal_100}
     on_value: 
       then:
-        - component.update: temp_range  # Met à jour les plages de température.
+        - component.update: temp_range
+    web_server:
+      sorting_group_id: sorting_group_temperature
+      sorting_weight: 10
 
-  # Calibration Temp. à 0°C
+  # Convert to Fahrenheit - Temp. 1
   - platform: template
-    name: Calibration à 0°C - Temp. 1  # Nom du capteur.
-    id: cal_0_sen  # Identifiant unique.
-    icon: mdi:thermometer-low  # Icône pour température basse.
-    unit_of_measurement: "°C"  # Unité : degrés Celsius.
-    disabled_by_default: true  # Désactivé par défaut.
-    state_class: "measurement"  # Mesure continue.
-    device_class: "temperature"  # Catégorie : température.
-    entity_category: "diagnostic"  # Catégorie : diagnostic.
+    state_class: "measurement"
+    device_class: "temperature"
+    id: temp_f
     lambda: |-
-      return {${cal_0}};  # Retourne la valeur définie dans les substitutions.
+      return id(temp_1).state * 9 / 5 + 32;
+    web_server:
+      sorting_group_id: sorting_group_temperature
 
-  # Calibration Temp. à 100°C
+  # Calibration Temp. at 0C
   - platform: template
-    name: Calibration à 100°C - Temp. 1  # Nom du capteur.
-    id: cal_100_sen  # Identifiant unique.
-    icon: mdi:thermometer-high  # Icône pour température haute.
-    unit_of_measurement: "°C"  # Unité : degrés Celsius.
-    disabled_by_default: true  # Désactivé par défaut.
-    state_class: "measurement"  # Mesure continue.
-    device_class: "temperature"  # Catégorie : température.
-    entity_category: "diagnostic"  # Catégorie : diagnostic.
+    name: Calibration at 0°C - Temp. 1
+    id: cal_0_sen
+    icon: mdi:thermometer-low
+    unit_of_measurement: "°C"
+    disabled_by_default: true
+    state_class: "measurement"
+    device_class: "temperature"
+    entity_category: "diagnostic"
     lambda: |-
-      return {${cal_100}};  # Retourne la valeur définie dans les substitutions.
+      return {${cal_0}};
+    web_server:
+      sorting_group_id: sorting_group_temperature
 
-  # Température extérieure (simule les saisons)
+  # Calibration Temp. at 100C
   - platform: template
-    name: "Température extérieure"  # Nom affiché.
-    id: outdoor_temperature  # Identifiant unique.
-    unit_of_measurement: "°C"  # Unité : degrés Celsius.
+    name: Calibration at 100°C - Temp. 1
+    id: cal_100_sen
+    icon: mdi:thermometer-high
+    unit_of_measurement: "°C"
+    disabled_by_default: true
+    state_class: "measurement"
+    device_class: "temperature"
+    entity_category: "diagnostic"
     lambda: |-
-      return 25.0;  // Simule une température extérieure constante. Modifiez si un capteur réel est disponible.
+      return {${cal_100}};
+    web_server:
+      sorting_group_id: sorting_group_temperature
 
 binary_sensor:
-  # Température critique (hors des limites 22°C à 30°C)
   - platform: template
-    name: "Température critique"  # Nom affiché.
-    id: critical_temperature  # Identifiant unique.
+    name: Ideal Temperature
+    id: ideal_temp
+    icon: mdi:thermometer-check
     lambda: |-
-      float temp = id(temp_1).state;  # Récupère la température.
-      return (temp < 22.0 || temp > 30.0);  // Retourne vrai si hors des limites.
-    device_class: problem  # Classifié comme un problème.
-
-  # Température optimale (selon la saison)
-  - platform: template
-    name: "Température optimale"
-    id: optimal_temperature
-    lambda: |-
-      float temp = id(water_temperature).state;
-      float outdoor_temp = id(outdoor_temperature).state;
-
-      if (outdoor_temp > 20.0) {  // Saison chaude
-        return (temp >= 24.0 && temp <= 27.0);
-      } else {  // Saison froide
-        return (temp >= 23.0 && temp <= 24.0);
+      if (id(temp_range).state == "OK") {
+        return true;
+      } else {
+        return false;
       }
-    device_class: safety
+    web_server:
+      sorting_group_id: sorting_group_temperature
 
 text_sensor:
+  # Temperature Range 1
   - platform: template
-    name: "Diagnostic température"  # Indique l'état de la température.
-    id: temperature_status  # Identifiant unique.
+    name: Temperature Range
+    id: temp_range
+    icon: mdi:thermometer-alert
+    update_interval: "${update_temp}"
     lambda: |-
-      float temp = id(temp_1).state;  # Température actuelle.
-      float outdoor_temp = id(outdoor_temperature).state;  # Température extérieure.
-
-      // Si la température est trop basse ou trop haute.
-      if (temp < 22.0) return {"DANGER : Trop froid (<22°C)"};
-      if (temp > 30.0) return {"DANGER : Trop chaud (>30°C)"};
-
-      // Analyse selon la saison.
-      if (outdoor_temp > 20.0) {
-        if (temp >= 24.0 && temp <= 27.0) return {"OK : Température optimale (saison chaude)"};
-        return {"Alerte : Hors plage saison chaude (24-27°C)"};
-      } else {
-        if (temp >= 23.0 && temp <= 24.0) return {"OK : Température optimale (saison froide)"};
-        return {"Alerte : Hors plage saison froide (23-24°C)"};
+      if(id(temp_f).state <= id(range_cool).state) {
+        return {"Cool"};
       }
-    icon: mdi:thermometer-alert  # Icône pour les alertes de température.
+      if(id(temp_f).state < id(range_warm).state && id(temp_f).state > id(range_cool).state) {
+        return {"OK"};
+      }
+      if(id(temp_f).state >= id(range_warm).state) {
+        return {"Warm"};
+      }     
+      else {
+        return {"Unknown"};
+      }  
+    web_server:
+      sorting_group_id: sorting_group_temperature
+      sorting_weight: 12
 
 number:
+  # Temperature 1 when Cool
   - platform: template
-    name: "Temp. lim. froide"  # Permet de configurer la limite basse.
-    id: range_cool  # Identifiant unique.
-    icon: mdi:thermometer-low  # Icône pour les températures basses.
-    optimistic: true  # Applique immédiatement la valeur configurée.
-    mode: box  # Utilise un champ de saisie dans Home Assistant.
-    min_value: 0.0  # Valeur minimale configurable.
-    max_value: 100.0  # Valeur maximale configurable.
-    step: 0.5  # Incréments pour ajuster la valeur.
-    restore_value: True  # Restaurer la valeur après redémarrage.
-    initial_value: ${range_cool}  # Valeur initiale définie via substitution.
-    entity_category: "Config"  # Catégorie : configuration.
-    device_class: "temperature"  # Classe : température.
+    name: "Temp. Cool"
+    id: range_cool
+    icon: mdi:thermometer-low
+    optimistic: true
+    mode: box
+    min_value: 0.0
+    max_value: 100.0
+    step: 0.5
+    restore_value: True
+    initial_value: ${range_cool}
+    entity_category: "Config"
+    device_class: "temperature"
     on_value: 
       then:
-        - component.update: temp_range  # Met à jour les plages de température.
+        - component.update: temp_range
+    web_server:
+      sorting_group_id: sorting_group_temperature
 
+  # Temperature 1 when Warm
   - platform: template
-    name: "Temp. lim. chaude"  # Permet de configurer la limite haute.
-    id: range_warm  # Identifiant unique.
-    icon: mdi:thermometer-high  # Icône pour les températures hautes.
-    optimistic: true  # Applique immédiatement la valeur configurée.
-    mode: box  # Utilise un champ de saisie.
-    min_value: 0.0  # Valeur minimale configurable.
-    max_value: 100.0  # Valeur maximale configurable.
-    step: 0.5  # Incréments pour ajuster la valeur.
-    restore_value: True  # Restaurer la valeur après redémarrage.
-    initial_value: ${range_warm}  # Valeur initiale définie via substitution.
-    entity_category: "Config"  # Catégorie : configuration.
-    device_class: "temperature"  # Classe : température.
+    name: "Temp. Warm"
+    icon: mdi:thermometer-high
+    id: range_warm
+    optimistic: true
+    mode: box
+    min_value: 0.0
+    max_value: 100.0
+    step: 0.5
+    restore_value: True
+    initial_value: ${range_warm}
+    entity_category: "Config"
+    device_class: "temperature"
     on_value: 
       then:
-        - component.update: temp_range  # Met à jour les plages de température.
+        - component.update: temp_range
+    web_server:
+      sorting_group_id: sorting_group_temperature
