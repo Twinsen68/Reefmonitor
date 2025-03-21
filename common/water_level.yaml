@@ -7,7 +7,7 @@ substitutions:
 web_server:
   sorting_groups:
     - id: sorting_group_water_level  # Groupe des capteurs de niveau d'eau
-      name: "Water Level"  # Nom affiché du groupe
+      name: "Niveau d'eau"  # Nom affiché du groupe
       sorting_weight: ${sorting_group_water_level_weight}
 
 esphome:
@@ -26,7 +26,7 @@ binary_sensor:
       mode:
         input: true
         pullup: true
-    name: "Optical Sensor: Low"
+    name: "Capteur : Bas"
     filters:
       - delayed_on_off: 30ms
     on_state:
@@ -44,7 +44,7 @@ binary_sensor:
       mode:
         input: true
         pullup: true
-    name: "Optical Sensor: High"
+    name: "Capteur : Haut"
     filters:
       - delayed_on_off: 30ms
     on_state:

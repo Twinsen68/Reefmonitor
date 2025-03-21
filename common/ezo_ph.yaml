@@ -90,7 +90,7 @@ sensor:
 
 text_sensor:
   - platform: template  # Résultat des commandes envoyées à la sonde pH
-    name: pH - Command Result
+    name: pH - Cmd Résultat
     icon: mdi:data-matrix
     id: result_ph
     web_server:
@@ -98,7 +98,7 @@ text_sensor:
 
 button:
   - platform: template  # Bouton pour déclencher la lecture du capteur pH
-    name: pH - Read
+    name: pH - Lire
     id: read_ph
     icon: mdi:read
     entity_category: "Config"
@@ -117,7 +117,7 @@ button:
       sorting_group_id: sorting_group_ph
 
   - platform: template
-    name: pH - commande selectionnee
+    name: pH - Envoi Cmd
     id: send_selected_ph
     entity_category: "Config"
     icon: mdi:apple-keyboard-command
@@ -167,7 +167,7 @@ button:
 
 select:
   - platform: template
-    name: pH - Command Select
+    name: pH - Cmd sélectionée
     id: select_command_ph
     icon: mdi:apple-keyboard-command
     optimistic: true
