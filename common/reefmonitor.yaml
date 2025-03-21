@@ -13,7 +13,7 @@ dashboard_import:
 text_sensor: 
   - platform: template  # Capteur texte indiquant la version actuelle de Reefmonitor
     name: "Reefmonitor Version"
-    id: Reefmonitor_version
+    id: reefmonitor_version
     icon: mdi:update
     update_interval: '365days'  # Intervalle de mise à jour très long (une fois par an)
     lambda: |-
