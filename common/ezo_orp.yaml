@@ -83,3 +83,59 @@ button:
             }
     web_server:
       sorting_group_id: sorting_group_orp
+  - platform: template
+    name: ORP - Command Send Selected
+    id: send_selected_orp
+    icon: mdi:apple-keyboard-command
+    entity_category: "Config"
+    # disabled_by_default: true
+    on_press:
+      then:
+        - lambda: |-
+            if (id(select_command_orp).state == "Read") {
+              id(orp_ezo).send_custom("R");
+            }
+            // Get Device Firmware Version
+            if (id(select_command_orp).state == "Information") {
+              id(orp_ezo).get_device_information();
+            }
+            if (id(select_command_orp).state == "Status") {
+              id(orp_ezo).send_custom("Status");
+            }
+            if (id(select_command_orp).state == "Check Calibration") {
+              id(orp_ezo).get_calibration();
+            }  
+            if (id(select_command_orp).state == "Calibrate @ 225 mV (WILL RESET CALIBRATION)") {
+              id(orp_ezo).send_custom("Cal,225");
+            }
+            if (id(select_command_orp).state == "Calibrate CLEAR (WILL RESET CALIBRATION)") {
+              id(orp_ezo).clear_calibration();
+            }
+            // else {
+            //   id(orp_ezo).send_custom("R");
+            // }
+    web_server:
+      sorting_group_id: sorting_group_orp
+
+select:
+  - platform: template
+    name: ORP - Command Select
+    id: select_command_orp
+    optimistic: true
+    icon: mdi:apple-keyboard-command
+    # disabled_by_default: true
+    entity_category: "Config"
+    options:
+      - "Read"
+      - "Information"
+      - "Status"
+      - "Check Calibration"
+      - "Calibrate @ 225 mV (WILL RESET CALIBRATION)"
+      - "Calibrate CLEAR (WILL RESET CALIBRATION)"
+    initial_option: "Check Calibration"
+    set_action:
+      - logger.log:
+          format: "Chosen option: %s"
+          args: ["x.c_str()"]
+    web_server:
+      sorting_group_id: sorting_group_orp
