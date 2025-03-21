@@ -357,6 +357,9 @@ button:
             if (id(select_command_ec).state == "Calibration CLEAR") {
               id(ec_ezo).clear_calibration();
             }
+            if (id(select_command_ec).state == "Réinitialisation") {
+              id(ec_ezo).send_custom("Factory");
+            }
             // else {
             //   id(ec_ezo).send_custom("R");
             // }
@@ -375,6 +378,7 @@ select:
       - "Lire"
       - "Information"
       - "Status"
+      - "Réinitialisation"
       - "Obt Val K"
       - "Obt val TDS"
       - "Conv en NaCl - 0.48"
