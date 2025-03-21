@@ -24,8 +24,6 @@ substitutions:
   addDO: "97"
   # RTD circuit, who's address is 102
   addRTD: "102"
-  # PMP circuit, who's address is 103
-  addPMP: "103"
   # HUM circuit, who's address is 111
   addHUM: "111"
   # CO2 circuit, who's address is 105
