@@ -1,3 +1,7 @@
+substitutions:
+  # App Version
+  app_version: "1.1.0"
+
 packages:  # Inclut des fichiers YAML externes pour modularité et réutilisation.
   device_base: !include common/device_base.yaml  # Contient les configurations de base du périphérique.
   reefmonitor: !include common/reefmonitor.yaml  # Fichier spécifique au projet reefmonitor.
