@@ -150,6 +150,28 @@ button:
     on_press:
       then:
         - lambda: |-
+            byte error;
+            Wire.beginTransmission(${addEC});
+            error = Wire.endTransmission();
+            if (error == 0) {
+              id(ec_ezo).send_custom("R");
+            }
+            else {
+              ESP_LOGW("custom_conductivity_read", "No Conductivity sensor detected at address: ${addEC}!");
+            }
+    web_server:
+      sorting_group_id: sorting_group_ec
+
+  # Send Selected EZO Command - Conductitivy
+  - platform: template
+    name: EC - Command Send Selected
+    icon: mdi:apple-keyboard-command
+    id: send_selected_ec
+    entity_category: "Config"
+    # disabled_by_default: true
+    on_press:
+      then:
+        - lambda: |-
             if (id(select_command_ec).state == "Read") {
               id(ec_ezo).send_custom("R");
             }
