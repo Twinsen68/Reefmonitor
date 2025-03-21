@@ -130,7 +130,7 @@ Une fois ces éléments prêts, passez à l’étape suivante : **Installation d
 1. **Ouvrez l’interface ESPHome** via l’add-on installé dans Home Assistant.
 2. Cliquez sur **"+"** pour ajouter un nouveau nœud.
 3. Dans la fenêtre de création :
-   - **Nom** : Saisissez `raphsreef` ou un autre nom unique.
+   - **Nom** : Saisissez `reefmonitor` ou un autre nom unique.
    - **Type d'appareil** : Sélectionnez **ESP32**.
 4. Une fois le nœud créé, ouvrez le fichier YAML associé et remplacez tout son contenu par celui de `install.yaml`.
 
@@ -174,7 +174,7 @@ Une fois ces éléments prêts, passez à l’étape suivante : **Installation d
 1. Si vous utilisez ESPHome localement ou sans fichier `secrets.yaml` :
    - Après le flash initial, l’ESP32 redémarre en mode **point d’accès Wi-Fi**.
    - Connectez-vous au réseau créé par l’ESP :
-     - **Nom du réseau** : `raphsreef-XXXX` (où `XXXX` est une partie de l’adresse MAC).
+     - **Nom du réseau** : `reefmonitor-XXXX` (où `XXXX` est une partie de l’adresse MAC).
      - **Mot de passe** : `configme`.
 2. Une fois connecté, une interface web s’ouvre automatiquement pour la configuration :
    - Entrez le **SSID** (nom de votre réseau Wi-Fi).
@@ -187,13 +187,13 @@ Une fois ces éléments prêts, passez à l’étape suivante : **Installation d
 1. Une fois que l’ESP32 est connecté à votre réseau Wi-Fi :
    - ESPHome utilise le fichier `install.yaml` pour récupérer automatiquement tous les fichiers YAML nécessaires au projet.
 2. Vérifiez les **logs ESPHome** pour confirmer que les fichiers sont correctement téléchargés :
-   - Dans l’interface ESPHome, cliquez sur le nom de votre nœud (`raphsreef`).
+   - Dans l’interface ESPHome, cliquez sur le nom de votre nœud (`reefmonitor`).
    - Regardez les logs pour vous assurer que les capteurs et les fichiers sont correctement chargés.
 
 ---
 
 ### **Étape 5 : Vérification**
-1. Depuis l’interface ESPHome, ouvrez les **logs** de votre nœud (`raphsreef`) :
+1. Depuis l’interface ESPHome, ouvrez les **logs** de votre nœud (`reefmonitor`) :
    - Vérifiez que tous les capteurs sont détectés.
    - Assurez-vous que les données des capteurs (température, pH, conductivité, etc.) s’affichent correctement.
 2. Si tout est en ordre, l’installation du nœud est terminée !
@@ -204,14 +204,14 @@ Une fois ces éléments prêts, passez à l’étape suivante : **Installation d
 Une fois le nœud configuré et fonctionnel, vous pouvez mettre à jour son firmware sans avoir besoin de rebrancher l’ESP à votre ordinateur.
 
 #### **Mise à Jour via Home Assistant :**
-1. Dans l’interface ESPHome, cliquez sur votre nœud (`raphsreef`).
+1. Dans l’interface ESPHome, cliquez sur votre nœud (`reefmonitor`).
 2. Cliquez sur **INSTALLER** et choisissez **"Sans fil (OTA)"** :
    - ESPHome compile et télécharge automatiquement le firmware mis à jour sur le nœud.
 
 #### **Mise à Jour en Local :**
 1. Exécutez la commande suivante dans votre terminal :
    ```bash
-   esphome run raphsreef.yaml
+   esphome run reefmonitor.yaml
 
 ## **Configuration des Capteurs et Actionneurs**
 
@@ -312,7 +312,7 @@ Une fois les capteurs et actionneurs configurés et fonctionnels sur votre nœud
 Home Assistant détecte automatiquement les nœuds ESPHome sur le réseau local. Voici comment ajouter votre nœud :
 1. Accédez à l’interface de Home Assistant.
 2. Cliquez sur **Paramètres** > **Appareils et Services**.
-3. Dans la section **Découvertes**, votre nœud ESP apparaîtra sous le nom configuré (par défaut : `raphsreef`).
+3. Dans la section **Découvertes**, votre nœud ESP apparaîtra sous le nom configuré (par défaut : `reefmonitor`).
 4. Cliquez sur **Configurer**, puis suivez les instructions pour ajouter le nœud.
 
 ---

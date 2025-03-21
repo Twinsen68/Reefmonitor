@@ -5,13 +5,13 @@ esp32:  # Configuration spécifique à la carte ESP32.
 
 # Section commentée pour une éventuelle importation depuis le tableau de bord ESPHome.
 #dashboard_import:
-#  package_import_url: github://Twinsen68/reefmonitor/raphsreef_config.yaml@main  # URL pour importer une configuration.
+#  package_import_url: github://Twinsen68/reefmonitor/reefmonitor_config.yaml@main  # URL pour importer une configuration.
 #  import_full_config: ${import_config}  # Option pour importer la configuration complète.
 
 packages:  # Permet d'inclure une configuration externe pour modularité et réutilisation.
   twinsen68.reefmonitor:  # Nom interne du package inclus.
     url: https://github.com/twinsen68/reefmonitor  # Dépôt GitHub où se trouve la configuration.
-    file: raphsreef_config.yaml  # Fichier de configuration spécifique à inclure.
+    file: reefmonitor_config.yaml  # Fichier de configuration spécifique à inclure.
 
 esphome:  # Paramètres globaux pour ESPHome.
   name: ${name}  # Nom de l'appareil, utilisant la substitution déclarée plus haut.

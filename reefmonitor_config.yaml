@@ -1,6 +1,6 @@
 packages:  # Inclut des fichiers YAML externes pour modularité et réutilisation.
   device_base: !include common/device_base.yaml  # Contient les configurations de base du périphérique.
-  raphsreef: !include common/raphsreef.yaml  # Fichier spécifique au projet raphsreef.
+  reefmonitor: !include common/reefmonitor.yaml  # Fichier spécifique au projet reefmonitor.
   optical: !include common/optical.yaml  # Gestion des capteurs optiques (par exemple, pour mesurer le niveau d'eau).
   ezo_ph: !include common/ezo_ph.yaml  # Intègre les sondes pH EZO pour surveiller l'acidité de l'eau.
   ezo_ec: !include common/ezo_ec.yaml  # Intègre les sondes EZO pour la conductivité électrique (EC).

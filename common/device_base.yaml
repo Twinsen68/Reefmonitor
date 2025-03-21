@@ -5,7 +5,7 @@ esphome:  # Déclare les paramètres globaux d'ESPHome.
   name_add_mac_suffix: true  # Ajoute automatiquement une partie de l'adresse MAC pour éviter les conflits.
   comment: "Raph's Reef ESP32 - Moniteur d'aquarium"  # Commentaire décrivant l'usage du périphérique.
   project:
-    name: twinsen68.raphsreef  # Identifiant du projet.
+    name: twinsen68.reefmonitor  # Identifiant du projet.
     version: "${app_version}"  # Version du projet définie dans les substitutions.
 
 # Enable logging

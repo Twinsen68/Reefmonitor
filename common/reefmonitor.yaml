@@ -1,8 +1,8 @@
 text_sensor: 
-  # raphsreef Version
+  # reefmonitor Version
   - platform: template
-    name: "raphsreef Version"  # Nom affiché dans Home Assistant.
-    id: raphsreef_version  # Identifiant unique.
+    name: "reefmonitor Version"  # Nom affiché dans Home Assistant.
+    id: reefmonitor_version  # Identifiant unique.
     icon: mdi:update  # Icône pour représenter les mises à jour ou versions.
     update_interval: '365days'  # Mise à jour annuelle (inutile de changer fréquemment la version).
     lambda: |-
