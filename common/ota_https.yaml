@@ -8,7 +8,7 @@ http_request:
   verify_ssl: false
 
 update:
-  - platform: rest  # Utilisation de REST pour récupérer la version du firmware
+  - platform: http_request 
     name: "reefmonitor Firmware Update"
     id: update_firmware_sensor
     entity_category: "diagnostic"
