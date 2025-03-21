@@ -133,7 +133,7 @@ text_sensor:  # Déclare des capteurs affichant du texte pour des diagnostics ou
     name: "EC - Commande selectionée envoyée"  # Bouton pour envoyer une commande EZO préconfigurée.
     id: send_selected_ec  # Identifiant unique du bouton.
     entity_category: "Config"  # Catégorie de configuration dans Home Assistant.
-    on_press:
+    #on_press:
       then:
         - lambda: |-
             // Analyse et exécution de la commande choisie.
