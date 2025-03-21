@@ -1,29 +1,31 @@
 substitutions:
-  update_firmware_sensor_interval: 6h  # Intervalle pour vérifier les mises à jour de firmware (6 heures).
+  ota_update_interval: 6h
 
 ota:
   - platform: http_request
 
 http_request:
-  verify_ssl: false  # Désactive la vérification SSL pour les connexions HTTPS.
+  verify_ssl: false
 
-
-# update:
-#   - platform: http_request
-#     name: reefmonitor Firmware Update
-#     update_interval: "${update_firmware_sensor_interval}"
-#     id: update_firmware_sensor
-#     entity_category: 'diagnostic'
-#     icon: mdi:update
-#     source: https://raw.githubusercontent.com/Twinsen68/raph/gh-pages/manifest.json
-
+update:
+  - platform: http_request
+    name: AquaPi Firmware Update
+    id: update_firmware_sensor
+    entity_category: 'diagnostic'
+    update_interval: ${ota_update_interval}
+    icon: mdi:update
+    source: https://raw.githubusercontent.com/Twinsen68/reefmonitor/firmware/aquapi.manifest.json
+    web_server:
+      sorting_group_id: sorting_group_diagnostic
 button:
   - platform: template
-    id: update_firmware  # Identifiant unique pour ce bouton.
-    name: Update reefmonitor Firmware - Releaseed (Experimental - ESP32)  # Nom affiché dans Home Assistant.
-    entity_category: "config"  # Catégorie de configuration dans Home Assistant.
-    icon: mdi:update  # Icône utilisée pour représenter les mises à jour.
-    # disabled_by_default: true  # Peut être activé/désactivé selon les besoins.
+    id: update_firmware
+    name: Update AquaPi Firmware - Stable
+    entity_category: "config"
+    icon: mdi:update
+    disabled_by_default: true
+    web_server:
+      sorting_group_id: sorting_group_config
     on_press: 
       then:
         - ota.http_request.flash:
