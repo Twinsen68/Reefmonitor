@@ -1,41 +1,54 @@
-substitutions:  # Définit des variables réutilisables pour simplifier la configuration.
+substitutions:
   # pH circuit, who's address is 99
-  addPH: "99"  # Adresse I2C du capteur EZO pH.
-  update_ph: "60s"  # Intervalle de mise à jour des mesures de pH.
+  addPH: "99"
+  update_ph: "60s"
+
+  sorting_group_ph: '30'
+
+web_server:
+  sorting_groups:
+    - id: sorting_group_ph
+      name: "pH - EZO"
+      sorting_weight: ${sorting_group_ph}
 
 api:
-  services:  # Liste des services personnalisés exposés à Home Assistant.
-    - service: ph_read_continous  # Service pour lire les données de pH en continu.
+  actions: 
+    - action: ph_change_address
+      variables:
+        address: int
+      then:
+        - lambda: |-
+            id(ph_ezo).send_custom("I2C,{{address}}");
+    - action: ph_custom_command
+      variables:
+        command: string
+      then:
+        - lambda: |-
+            id(ph_ezo).send_custom({{command}});
+    - action: ph_read_continous
       then:
       - repeat:
-          count: 60  # Lit les données 60 fois.
+          count: 60
           then:
-          - button.press: read_ph  # Presse un bouton pour lire les données.
-          - delay: 1s  # Ajoute un délai d'une seconde entre chaque lecture.
-
-    - service: ph_calibrate_mid_7  # Calibrage pour un pH moyen (7.00).
+          - button.press: read_ph
+          - delay: 1s
+    - action: ph_calibrate_mid_7
       then:
       - lambda: |-
-          id(ph_ezo).set_calibration_point_mid(7.00);  # Commande de calibration à pH 7.
-
-    - service: ph_calibrate_low_4  # Calibrage pour un pH bas (4.00).
+          id(ph_ezo).set_calibration_point_mid(7.00);
+    - action: ph_calibrate_low_4
       then:
       - lambda: |-
-          id(ph_ezo).set_calibration_point_low(4.00);  # Commande de calibration à pH 4.
-
-    - service: ph_calibrate_high_10  # Calibrage pour un pH haut (10.00).
+          id(ph_ezo).set_calibration_point_low(4.00);
+    - action: ph_calibrate_high_10
       then:
       - lambda: |-
-          id(ph_ezo).set_calibration_point_high(10.00);  # Commande de calibration à pH 10.
-
-    - service: ph_calibrate_high_1001  # Calibrage alternatif pour pH haut (10.01).
+          id(ph_ezo).set_calibration_point_high(10.00);
+    - action: ph_calibrate_high_1001
       then:
       - lambda: |-
-          id(ph_ezo).set_calibration_point_high(10.01);  # Commande de calibration à pH 10.01.
-
-    # Section commentée pour des services personnalisés supplémentaires.
-    # Ces lignes peuvent être décommentées pour définir des commandes spécifiques.
-    # - service: ezo_ph_custom_command
+          id(ph_ezo).set_calibration_point_high(10.01);
+    # - action: ezo_ph_custom_command
     #   variables:
     #     command: string
     #   then:
@@ -43,192 +56,155 @@ api:
     #         id(ph_ezo).send_custom('{{ command }}');
 
 esphome:
-  on_boot:  # Actions exécutées au démarrage du microcontrôleur.
-    priority: 800  # Priorité élevée pour exécuter rapidement ces actions.
+  on_boot: 
+    priority: 800
     then:
-      - button.press: send_selected_ph  # Envoie une commande pré-sélectionnée à la sonde.
+      - button.press: send_selected_ph
 
 sensor:
-  - platform: ezo  # Plateforme ESPHome pour les capteurs EZO.
-    icon: mdi:ph  # Icône représentant un capteur de pH.
-    name: "pH"  # Nom affiché dans Home Assistant.
-    id: ph_ezo  # Identifiant unique pour ce capteur.
-    address: ${addPH}  # Adresse I2C du capteur définie dans les substitutions.
-    unit_of_measurement: ""  # pH est une grandeur sans unité.
-    accuracy_decimals: 2  # Précision à deux décimales.
-    update_interval: "${update_ph}"  # Intervalle de mise à jour des données.
-    state_class: "measurement"  # Classe d'état pour une mesure continue.
-    device_class: PH  # Classe d'appareil : mesure de pH.
-    on_value:
-      then:
-        - lambda: |-
-            // Met à jour la valeur minimale sur 24h.
-            if (id(ph_min_24h).state > x || isnan(id(ph_min_24h).state)) {
-              id(ph_min_24h).publish_state(x);
-            }
-            // Met à jour la valeur maximale sur 24h.
-            if (id(ph_max_24h).state < x || isnan(id(ph_max_24h).state)) {
-              id(ph_max_24h).publish_state(x);
-            }
-    on_custom:
+  # EZO Circuits (SCL/RX, SDA/TX)
+  # EZO Circuit - pH
+  - platform: ezo
+    icon: mdi:ph
+    name: "pH"
+    id: ph_ezo
+    address: ${addPH}
+    unit_of_measurement: ""
+    accuracy_decimals: 2
+    update_interval: "${update_ph}"
+    state_class: "measurement"
+    device_class: PH
+    on_custom: 
       then:
         - lambda: 
-            id(result_ph).publish_state(x);  # Publie les données brutes pour des calculs supplémentaires.
-    on_calibration:
+            id(result_ph).publish_state(x);
+    on_calibration: 
       then:
         - lambda: 
-            id(result_ph).publish_state(x);  # Met à jour le résultat après une calibration.
-    on_device_information:
+            id(result_ph).publish_state(x);
+    on_device_information: 
       then:
         - lambda: 
-            id(result_ph).publish_state(x);  # Publie les informations sur l'appareil.
-    on_slope:
+            id(result_ph).publish_state(x);
+    on_slope: 
       then:
         - lambda: 
-            id(result_ph).publish_state(x);  # Met à jour la pente mesurée.
-    on_t:
+            id(result_ph).publish_state(x);
+    on_t: 
       then:
         - lambda: 
-            id(result_ph).publish_state(x);  # Met à jour les données de température si disponibles.
-
-  # pH Minimum sur 24h
-  - platform: template
-    name: "pH Minimum - 24h"  # Capteur pour suivre le pH minimum.
-    id: ph_min_24h  # Identifiant unique.
-    unit_of_measurement: ""  # pH est sans unité.
-    accuracy_decimals: 2  # Précision à deux décimales.
-    icon: mdi:arrow-down  # Icône pour indiquer la valeur minimale.
-    state_class: measurement  # Indique une mesure continue.
-    lambda: |-
-      return NAN;  # Initialise avec une valeur indéfinie.
-
-  # pH Maximum sur 24h
-  - platform: template
-    name: "pH Maximum - 24h"  # Capteur pour suivre le pH maximum.
-    id: ph_max_24h  # Identifiant unique.
-    unit_of_measurement: ""  # pH est sans unité.
-    accuracy_decimals: 2  # Précision à deux décimales.
-    icon: mdi:arrow-up  # Icône pour indiquer la valeur maximale.
-    state_class: measurement  # Indique une mesure continue.
-    lambda: |-
-      return NAN;  # Initialise avec une valeur indéfinie.
-
-binary_sensor:
-  # Indique si le pH est hors des plages acceptables (critique).
-  - platform: template
-    name: "pH Critique"  # Nom affiché pour ce capteur binaire.
-    id: ph_critical  # Identifiant unique.
-    lambda: |-
-      float ph = id(ph_ezo).state;  # Récupère l'état actuel du pH.
-      return (ph < 7.8 || ph > 8.4);  # Retourne vrai si le pH est hors de la plage 7.8-8.4.
-    device_class: problem  # Classe de l'appareil pour signaler un problème.
-
-  # Indique si le pH est dans la plage optimale.
-  - platform: template
-    name: "pH Optimal"  # Nom affiché pour ce capteur binaire.
-    id: ph_optimal  # Identifiant unique.
-    lambda: |-
-      float ph = id(ph_ezo).state;  # Récupère l'état actuel du pH.
-      return (ph >= 7.8 && ph <= 8.4);  # Retourne vrai si le pH est dans la plage optimale.
-    device_class: safety  # Classe de l'appareil indiquant un état sûr.
+            id(result_ph).publish_state(x);
+    web_server:
+      sorting_group_id: sorting_group_ph
+      sorting_weight: 10
 
 text_sensor:
-  # Affiche les résultats des commandes envoyées au capteur.
+  # Selected Command Result - pH
   - platform: template
-    name: "pH - Valeur Commande"  # Nom du capteur textuel.
-    icon: mdi:data-matrix  # Icône représentant une matrice de données.
-    id: result_ph  # Identifiant unique.
-    # disabled_by_default: true  # Peut être activé/désactivé selon le besoin.
+    name: pH - Command Result
+    icon: mdi:data-matrix
+    id: result_ph
+    # disabled_by_default: true
+    web_server:
+      sorting_group_id: sorting_group_ph
 
 button:
-  # Bouton pour lire manuellement les données de la sonde.
+  # Read pH Probe
   - platform: template
-    name: "pH - Lire"  # Nom affiché pour le bouton.
-    id: read_ph  # Identifiant unique.
-    icon: mdi:read  # Icône indiquant une action de lecture.
-    entity_category: "Config"  # Catégorie pour organiser dans Home Assistant.
-    # disabled_by_default: true  # Peut être activé/désactivé selon le besoin.
+    name: pH - Read
+    id: read_ph
+    icon: mdi:read
+    entity_category: "Config"
+    # disabled_by_default: true
     on_press:
       then:
         - lambda: |-
-            byte error;  # Variable pour capturer les erreurs.
-            id(ph_ezo).send_custom("R");  # Envoie une commande de lecture à la sonde.
-            error = Wire.endTransmission();  # Termine la communication et détecte les erreurs.
-            if (error == 0) {  # Si aucune erreur n'est détectée.
-              id(ph_ezo).send_custom("R");  # Commande de lecture répétée.
+            byte error;
+            id(ph_ezo).send_custom("R");
+            error = Wire.endTransmission();
+            if (error == 0) {
+              id(ph_ezo).send_custom("R");
             }
             else {
-              ESP_LOGW("custom_ph_read", "Pas de Capteur PH à cette adresse: ${addPH}!!");  # Log si le capteur n'est pas détecté.
+              ESP_LOGW("custom_ph_read", "No pH sensor detected at address: ${addPH}!!");
             }
+    web_server:
+      sorting_group_id: sorting_group_ph
 
-  # Bouton pour envoyer une commande préconfigurée à la sonde.
+  # Send Selected EZO Command - pH
   - platform: template
-    name: "pH - Commande selectionée envoyée"  # Nom affiché pour le bouton.
-    id: send_selected_ph  # Identifiant unique.
-    entity_category: "Config"  # Catégorie pour organisation.
-    # disabled_by_default: true  # Peut être activé/désactivé selon le besoin.
+    name: pH - Command Send Selected
+    id: send_selected_ph
+    entity_category: "Config"
+    icon: mdi:apple-keyboard-command
+    # disabled_by_default: true
     on_press:
       then:
         - lambda: |-
-            if (id(select_command_ph).state == "Lire") {
-              id(ph_ezo).send_custom("R");  # Commande pour lire les données.
+            if (id(select_command_ph).state == "Read") {
+              id(ph_ezo).send_custom("R");
             }
+            // Get Device Firmware Version
             if (id(select_command_ph).state == "Information") {
-              id(ph_ezo).get_device_information();  # Commande pour récupérer des informations sur l'appareil.
+              id(ph_ezo).get_device_information();
             }
             if (id(select_command_ph).state == "Status") {
-              id(ph_ezo).send_custom("Status");  # Commande pour obtenir l'état actuel.
+              id(ph_ezo).send_custom("Status");
             }
-            if (id(select_command_ph).state == "Obtenir ° Précision") {
-              id(ph_ezo).get_slope();  # Commande pour récupérer la précision de la pente.
+            if (id(select_command_ph).state == "Get Slope") {
+              id(ph_ezo).get_slope();
             }
-            if (id(select_command_ph).state == "Vérifier calibration") {
-              id(ph_ezo).get_calibration();  # Vérifie l'état de la calibration.
+            if (id(select_command_ph).state == "Check Calibration") {
+              id(ph_ezo).get_calibration();
             }  
-            if (id(select_command_ph).state == "Calibration @ moyenne = 7") {
-              id(ph_ezo).set_calibration_point_mid(7.00);  # Calibrage à pH 7.
+            if (id(select_command_ph).state == "Calibrate @ MID = 7 (WILL RESET CALIBRATION)") {
+              id(ph_ezo).set_calibration_point_mid(7.00);
             }
-            if (id(select_command_ph).state == "Calibration @ basse = 4") {
-              id(ph_ezo).set_calibration_point_low(4.00);  # Calibrage à pH 4.
+            if (id(select_command_ph).state == "Calibrate @ LOW = 4 (WILL RESET CALIBRATION)") {
+              id(ph_ezo).set_calibration_point_low(4.00);
             }
-            if (id(select_command_ph).state == "Calibration @ haute = 10") {
-              id(ph_ezo).set_calibration_point_high(10.00);  # Calibrage à pH 10.
+            if (id(select_command_ph).state == "Calibrate @ HIGH = 10 (WILL RESET CALIBRATION)") {
+              id(ph_ezo).set_calibration_point_high(10.00);
             }
-            if (id(select_command_ph).state == "Effacer calibration") {
-              id(ph_ezo).clear_calibration();  # Réinitialise la calibration.
+            if (id(select_command_ph).state == "Calibrate @ HIGH = 10.01 (WILL RESET CALIBRATION)") {
+              id(ph_ezo).set_calibration_point_high(10.01);
             }
-
-            // else {
-            //   id(ph_ezo).send_custom("R");
+            if (id(select_command_ph).state == "Calibrate CLEAR (WILL RESET CALIBRATION)") {
+              id(ph_ezo).clear_calibration();
+            }
+            // if (id(select_command_ph).state == "Reset EZO (WILL RESET CALIBRATION)") {
+            //   id(ph_ezo).send_custom("Factory");
             // }
+            else {
+              id(ph_ezo).send_custom("R");
+            }
+    web_server:
+      sorting_group_id: sorting_group_ph
 
 select:
   - platform: template
-    name: "pH - Command Select"  # Menu déroulant pour sélectionner une commande spécifique.
-    id: select_command_ph  # Identifiant unique.
-    optimistic: true  # Met à jour immédiatement l'état sélectionné sans attendre la confirmation matérielle.
-    # disabled_by_default: true  # Peut être activé/désactivé selon le besoin.
-    entity_category: "Config"  # Catégorie pour organisation.
-    options:  # Liste des commandes disponibles.
-      - "Lire"  # Lecture des données actuelles.
-      - "Information"  # Récupération des informations du capteur.
-      - "Status"  # État actuel du capteur.
-      - "Obtenir ° Précision"  # Obtenir la précision de la pente.
-      - "Vérifier calibration"  # Vérifier l'état de la calibration.
-      - "Calibration @ moyenne = 7"  # Calibration à pH 7.
-      - "Calibration @ basse = 4"  # Calibration à pH 4.
-      - "Calibration @ haute = 10"  # Calibration à pH 10.
-      - "Effacer calibration"  # Réinitialisation de la calibration.
-    initial_option: "Vérifier calibration"  # Option sélectionnée par défaut.
-    set_action:  # Actions exécutées lors de la sélection.
-      - logger.log:  # Ajoute une entrée dans les journaux pour indiquer la commande choisie.
+    name: pH - Command Select
+    id: select_command_ph
+    icon: mdi:apple-keyboard-command
+    optimistic: true
+    # disabled_by_default: true
+    entity_category: "Config"
+    options:
+      - "Read"
+      - "Information"
+      - "Status"
+      - "Get Slope"
+      - "Check Calibration"
+      - "Calibrate @ MID = 7 (WILL RESET CALIBRATION)"
+      - "Calibrate @ LOW = 4 (WILL RESET CALIBRATION)"
+      - "Calibrate @ HIGH = 10 (WILL RESET CALIBRATION)"
+      - "Calibrate @ HIGH = 10.01 (WILL RESET CALIBRATION)"
+      - "Calibrate CLEAR (WILL RESET CALIBRATION)"
+      # - "Reset EZO (WILL RESET CALIBRATION)"
+    initial_option: "Check Calibration"
+    set_action:
+      - logger.log:
           format: "Chosen option: %s"
-          args: ["x.c_str()"]  # Affiche l'option sélectionnée dans les logs.
-
-interval:
-  # Réinitialise les valeurs minimales et maximales de pH toutes les 24 heures.
-  - interval: 24h
-    then:
-      - lambda: |-
-          id(ph_min_24h).publish_state(NAN);  # Réinitialise le pH minimum.
-          id(ph_max_24h).publish_state(NAN);  # Réinitialise le pH maximum.
+          args: ["x.c_str()"]
+    web_server:
+      sorting_group_id: sorting_group_ph
