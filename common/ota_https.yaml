@@ -1,8 +1,11 @@
 substitutions:
-  ota_update_interval: 6h  # Vérification toutes les 6 heures
+  ota_update_interval: 6h
+
+ota:
+  - platform: http_request
 
 http_request:
-  verify_ssl: false  # Désactive la vérification SSL pour éviter les erreurs sur GitHub
+  verify_ssl: false
 
 update:
   - platform: rest  # Utilisation de REST pour récupérer la version du firmware
@@ -27,4 +30,3 @@ button:
         - ota.http_request.flash:
             md5_url: https://raw.githubusercontent.com/Twinsen68/reefmonitor/main/bin/ota/reefmonitor-esp32.ota.md5
             url: https://raw.githubusercontent.com/Twinsen68/reefmonitor/main/bin/ota/reefmonitor-esp32.ota.bin
-  
