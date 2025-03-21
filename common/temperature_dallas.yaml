@@ -8,7 +8,7 @@ substitutions:
   plage_correct: "22.0"  # Valeur par défaut de la plage correcte (modifie si besoin)
   plage_chaude: "28.0"  # Valeur par défaut de la plage chaude
 
-  sorting_group_temperature_weight: "10"  # Poids de tri du groupe de température dans l'interface web
+  sorting_group_temperature_weight: '10'  # Poids de tri du groupe de température dans l'interface web
 
 web_server:
   sorting_groups:

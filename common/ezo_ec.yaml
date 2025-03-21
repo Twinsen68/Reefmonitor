@@ -28,7 +28,7 @@ api:
     - action: ec_read_continous  # Lecture continue de la sonde EC pendant 60 secondes
       then:
         - repeat:
-            count: 60
+            count: 60000
             then:
               - button.press: read_ec
               - delay: 1s
