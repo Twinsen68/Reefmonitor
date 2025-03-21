@@ -84,7 +84,7 @@ Avant de commencer l’installation d’Aquarium Monitor avec ESPHome, assurez-v
 
 3. **Accès GitHub** :
    - Clonez ou téléchargez les fichiers YAML nécessaires depuis le dépôt :
-     [Aquarium Monitor - GitHub](https://github.com/twinsen68/raphreef).
+     [Aquarium Monitor - GitHub](https://github.com/twinsen68/reefmonitor).
 
 4. **Utilisation du fichier `install.yaml`** :
    - Si vous utilisez ESPHome via Home Assistant, le fichier `install.yaml` permet de récupérer automatiquement tous les fichiers nécessaires. Pour l’utiliser :
@@ -118,7 +118,7 @@ Une fois ces éléments prêts, passez à l’étape suivante : **Installation d
 
 ### **Étape 1 : Récupération des Fichiers**
 1. Téléchargez les fichiers nécessaires depuis le dépôt GitHub :
-   - [Aquarium Monitor - GitHub](https://github.com/twinsen68/raphreef).
+   - [Aquarium Monitor - GitHub](https://github.com/twinsen68/reefmonitor).
    - Assurez-vous de disposer du fichier `install.yaml` pour automatiser l’installation via Home Assistant.
 2. Placez les fichiers YAML dans un répertoire accessible par ESPHome.
 

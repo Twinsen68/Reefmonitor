@@ -16,7 +16,7 @@ text_sensor:
     icon: mdi:github  # Icône du logo GitHub.
     update_interval: '365days'  # Mise à jour annuelle (le lien ne change pas souvent).
     lambda: |-
-      return {"github.com/twinsen68/raphreef"};  # Retourne l'URL du dépôt GitHub.
+      return {"github.com/twinsen68/reefmonitor"};  # Retourne l'URL du dépôt GitHub.
     entity_category: "diagnostic"  # Classé comme un diagnostic.
 
   # Déclaration d'un capteur textuel pour afficher l'heure actuelle synchronisée via SNTP

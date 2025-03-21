@@ -22,7 +22,7 @@ wifi:  # Configuration du Wi-Fi.
   password: "Votre_Mot_De_Passe"  # Mot de passe du réseau principal.
 
   ap:  # Configuration pour un mode Access Point de secours.
-    ssid: "Raphreef_Recovery"  # Nom du réseau en mode AP.
+    ssid: "reefmonitor_Recovery"  # Nom du réseau en mode AP.
     password: "MotDePasse_AP"  # Mot de passe pour se connecter au mode AP.
 
 captive_portal:  # Active un portail captif pour simplifier la configuration initiale du réseau.

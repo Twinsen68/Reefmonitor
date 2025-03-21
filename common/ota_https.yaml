@@ -27,5 +27,5 @@ button:
     on_press: 
       then:
         - ota.http_request.flash:
-            md5_url: https://raw.githubusercontent.com/Twinsen68/raphreef/main/bin/ota/raphsreef-esp32.ota.md5  # URL pour vérifier la somme MD5 du firmware.
-            url: https://raw.githubusercontent.com/Twinsen68/raphreef/main/bin/ota/raphsreef-esp32.ota.bin  # URL pour télécharger et flasher le firmware OTA.
+            md5_url: https://raw.githubusercontent.com/Twinsen68/reefmonitor/main/bin/ota/raphsreef-esp32.ota.md5  # URL pour vérifier la somme MD5 du firmware.
+            url: https://raw.githubusercontent.com/Twinsen68/reefmonitor/main/bin/ota/raphsreef-esp32.ota.bin  # URL pour télécharger et flasher le firmware OTA.
