@@ -67,8 +67,7 @@ text_sensor:
       } else {
         return {"Inconnu"};
       }
-
-web_server:
+    web_server:
       sorting_group_id: sorting_group_temperature
       sorting_weight: 12
 
