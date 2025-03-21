@@ -28,7 +28,7 @@ api:
     - action: ec_read_continous  # Lecture continue de la sonde EC pendant 60 secondes
       then:
         - repeat:
-            count: 60000
+            count: 60
             then:
               - button.press: read_ec
               - delay: 1s
@@ -199,6 +199,7 @@ button:
             }
             if (id(select_command_ec).state == "reinitialisation") {
               id(ec_ezo).send_custom("Factory");
+            }
             // else {
             //   id(ec_ezo).send_custom("R");
             // }
