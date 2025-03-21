@@ -207,4 +207,4 @@ select:
           format: "Chosen option: %s"
           args: ["x.c_str()"]
     web_server:
-      sorting_group_id: sorting_group_ph
+      sorting_group_id: sorting_group_pha
