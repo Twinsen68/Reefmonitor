@@ -61,7 +61,7 @@ web_server:
       name: "${sorting_group_name}Diagnostic"
       sorting_weight: ${sorting_group_diagnostic_weight}
     - id: sorting_group_config
-      name: "AquaPi Configuration"
+      name: "Reefmonitor Configuration"
       sorting_weight: ${sorting_group_config_weight}
     - id: sorting_group_misc
       name: "Misc. Sensors"

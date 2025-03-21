@@ -1,7 +1,7 @@
 substitutions:
   # names
-  name: "aquapi"
-  friendly_name: "AquaPi"
+  name: "Reefmonitor"
+  friendly_name: "Reefmonitor"
   # Logger Level - Can use VERBOSE for more information in Logs
   logger: "DEBUG"
 
