@@ -5,8 +5,8 @@ substitutions:
   # Variables de calibration des températures
   cal_0: "0.0"  # Point de calibration bas à 0°C (eau glacée)
   cal_100: "100.0"  # Point de calibration haut à 100°C (eau bouillante)
-  plage_correct: "74"  # Seuil inférieur de température en °F
-  plage_chaude: "82"  # Seuil supérieur de température en °F
+  plage_correct: "22.0"  # Valeur par défaut de la plage correcte (modifie si besoin)
+  plage_chaude: "28.0"  # Valeur par défaut de la plage chaude
 
   sorting_group_temperature_weight: "10"  # Poids de tri du groupe de température dans l'interface web
 
@@ -61,13 +61,14 @@ text_sensor:
       if (id(temp_f).state <= id(plage_correct).state) {
         return {"Cool"};
       } else if (id(temp_f).state >= id(plage_chaude).state) {
-        return {"Warm"};
+        return {"Chaud"};
       } else if (id(temp_f).state > id(plage_correct).state && id(temp_f).state < id(plage_chaude).state) {
         return {"OK"};
       } else {
-        return {"Unknown"};
+        return {"Inconnu"};
       }
-    web_server:
+
+web_server:
       sorting_group_id: sorting_group_temperature
       sorting_weight: 12
 
