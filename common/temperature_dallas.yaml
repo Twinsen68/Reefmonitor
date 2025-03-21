@@ -58,11 +58,11 @@ text_sensor:
     icon: mdi:thermometer-alert
     update_interval: "${update_temp}"
     lambda: |-
-      if (id(temp_f).state <= id(plage_correct).state) {
+      if (id(temp_1).state <= id(plage_correct).state) {
         return {"Cool"};
-      } else if (id(temp_f).state >= id(plage_chaude).state) {
+      } else if (id(temp_1).state >= id(plage_chaude).state) {
         return {"Chaud"};
-      } else if (id(temp_f).state > id(plage_correct).state && id(temp_f).state < id(plage_chaude).state) {
+      } else if (id(temp_1).state > id(plage_correct).state && id(temp_1).state < id(plage_chaude).state) {
         return {"OK"};
       } else {
         return {"Inconnu"};
