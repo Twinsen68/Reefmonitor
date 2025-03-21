@@ -1,0 +1,27 @@
+esp32:  # Configuration spécifique à la carte ESP32.
+  board: esp32dev  # Modèle de carte ESP32 (ici, une carte de développement générique).
+  framework:
+    type: arduino  # Le framework logiciel utilisé (Arduino, très compatible avec ESPHome).
+
+# Section commentée pour une éventuelle importation depuis le tableau de bord ESPHome.
+#dashboard_import:
+#  package_import_url: github://Twinsen68/raphreef/raphsreef_config.yaml@main  # URL pour importer une configuration.
+#  import_full_config: ${import_config}  # Option pour importer la configuration complète.
+
+packages:  # Permet d'inclure une configuration externe pour modularité et réutilisation.
+  twinsen68.raphreef:  # Nom interne du package inclus.
+    url: https://github.com/twinsen68/raphreef  # Dépôt GitHub où se trouve la configuration.
+    file: raphsreef_config.yaml  # Fichier de configuration spécifique à inclure.
+
+esphome:  # Paramètres globaux pour ESPHome.
+  name: ${name}  # Nom de l'appareil, utilisant la substitution déclarée plus haut.
+  name_add_mac_suffix: false  # Si true, ajoute un suffixe basé sur l'adresse MAC pour éviter les doublons.
+  friendly_name: ${friendly_name}  # Nom convivial, également basé sur la substitution.
+
+api:  # Configuration de l'API ESPHome pour la communication avec Home Assistant.
+  encryption:
+    key: tsHqLo48mLGhWo/qQQrZUFdsEwuZcC1/BlUOXWExy14=  # Clé de chiffrement pour sécuriser les échanges via l'API.
+
+wifi:  # Configuration du réseau Wi-Fi.
+  ssid: !secret wifi_ssid  # Nom du réseau Wi-Fi, masqué ici pour plus de sécurité.
+  password: !secret wifi_password  # Mot de passe du réseau Wi-Fi, également masqué.

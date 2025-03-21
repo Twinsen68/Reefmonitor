@@ -1,0 +1,41 @@
+text_sensor: 
+  # raphsreef Version
+  - platform: template
+    name: "raphsreef Version"  # Nom affiché dans Home Assistant.
+    id: raphsreef_version  # Identifiant unique.
+    icon: mdi:update  # Icône pour représenter les mises à jour ou versions.
+    update_interval: '365days'  # Mise à jour annuelle (inutile de changer fréquemment la version).
+    lambda: |-
+      return {"${app_version}"};  # Retourne la version définie dans les substitutions.
+    entity_category: "diagnostic"  # Classé comme un diagnostic dans Home Assistant.
+
+  # GitHub Project URL
+  - platform: template
+    name: GitHub  # Nom affiché dans Home Assistant.
+    id: github  # Identifiant unique.
+    icon: mdi:github  # Icône du logo GitHub.
+    update_interval: '365days'  # Mise à jour annuelle (le lien ne change pas souvent).
+    lambda: |-
+      return {"github.com/twinsen68/raphreef"};  # Retourne l'URL du dépôt GitHub.
+    entity_category: "diagnostic"  # Classé comme un diagnostic.
+
+  # Déclaration d'un capteur textuel pour afficher l'heure actuelle synchronisée via SNTP
+  - platform: template
+    name: "Heure actuelle"  # Nom visible dans Home Assistant pour ce capteur
+    lambda: |-
+      // Vérifie si l'instance SNTP a une heure valide synchronisée
+      if (id(sntp_time).now().is_valid()) {
+        // Si oui, retourne l'heure actuelle au format HH:MM:SS (heure:minute:seconde)
+        return id(sntp_time).now().strftime("%H:%M:%S");
+      } else {
+        // Si non, indique que l'heure n'est pas synchronisée
+        return {"Non synchronisé"};
+      }
+    icon: mdi:clock  # Icône représentant une horloge, utilisée pour un affichage clair dans Home Assistant
+
+time:
+  # Synchronisation horaire pour la gestion des cycles 24h
+  - platform: sntp
+    id: sntp_time
+
+

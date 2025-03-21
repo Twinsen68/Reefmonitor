@@ -1,0 +1,313 @@
+substitutions:  # Définit des variables pour centraliser les paramètres communs.
+  # Adresse du circuit EZO pour la conductivité.
+  addEC: "100"  # Adresse I2C du capteur (100 est l'adresse par défaut d'EZO EC).
+  update_ec: "60s"  # Fréquence des mises à jour des capteurs (60 secondes).
+  update_button_ec: "60s"  # Intervalle pour actualiser les actions des boutons.
+
+api:
+  services:  # Définit des services personnalisés accessibles depuis Home Assistant.
+    - service: ec_read_continous  # Lit les données de la sonde en continu pendant une durée définie.
+      then:
+      - repeat:
+          count: 60  # Effectue la lecture 60 fois.
+          then:
+          - button.press: read_ec  # Simule un appui sur le bouton "lire EC".
+          - delay: 1s  # Ajoute un délai d'une seconde entre chaque lecture.
+
+    - service: ec_calibrate_dry  # Calibrage à sec pour le capteur EZO EC.
+      then:
+      - lambda: |-
+          id(ec_ezo).send_custom("Cal,dry");  # Commande pour lancer le calibrage à sec.
+
+    - service: ec_calibrate_low_12880  # Calibrage pour une faible conductivité.
+      then:
+      - lambda: |-
+          id(ec_ezo).send_custom("Cal,low,12880");  # Valeur 12880 µS/cm pour un calibrage de basse précision.
+
+    - service: ec_calibrate_high_80000  # Calibrage pour une conductivité élevée.
+      then:
+      - lambda: |-
+          id(ec_ezo).send_custom("Cal,high,80000");  # Valeur 80000 µS/cm pour une haute précision.
+
+esphome:
+  on_boot:  # Actions à effectuer lors du démarrage de l'ESP32.
+    priority: 800  # Priorité des actions au démarrage (valeur haute pour exécution rapide).
+    then:
+      - button.press: read_ec  # Lit immédiatement les données de la sonde après démarrage.
+      - button.press: send_selected_ec  # Envoie une commande préconfigurée à la sonde.
+
+interval:
+  - interval: "${update_button_ec}"  # Définit une répétition automatique.
+    then:
+      - button.press: read_ec  # Action répétée pour actualiser les données EC (conductivité).
+
+sensor:
+  - platform: ezo  # Plateforme pour capteurs EZO (compatibles I2C).
+    icon: mdi:shaker-outline  # Icône personnalisée pour l'interface Home Assistant.
+    name: "Conductivité"  # Nom du capteur affiché dans Home Assistant.
+    id: ec_ezo  # Identifiant unique pour ce capteur.
+    address: ${addEC}  # Adresse I2C définie via substitution (`addEC`).
+    unit_of_measurement: "mS/cm"  # Unité utilisée pour afficher la conductivité.
+    accuracy_decimals: 2  # Précision à 2 chiffres après la virgule.
+    update_interval: "${update_ec}"  # Fréquence des mises à jour.
+    state_class: "measurement"  # Indique que cette donnée représente une mesure continue.
+    device_class: "volatile_organic_compounds_parts"  # Classe du dispositif (adaptée ici à la conductivité).
+    filters:
+      - lambda:
+          return (x / 1000);  # Convertit les µS en mS (millisiemens).
+    on_custom: 
+      then:
+        - lambda: 
+            id(raw_value_ec).publish_state(x);  # Publie les valeurs brutes pour calculs supplémentaires.
+
+  - platform: template  # Capteur de salinité calculée à partir des données EC.
+    name: "Salinité"  # Nom affiché dans Home Assistant.
+    id: sensor_salinity  # Identifiant unique pour ce capteur.
+    icon: mdi:shaker-outline  # Icône pour représenter la salinité.
+    unit_of_measurement: "ppt"  # Parties par millier, unité typique de la salinité.
+    accuracy_decimals: 2  # Précision des mesures.
+    update_interval: "${update_ec}"  # Fréquence des mises à jour.
+    state_class: "measurement"  # Classe d'état utilisée.
+    lambda: |-
+      std::string str = id(raw_value_ec).state;  # Récupère les données brutes.
+      std::vector<std::string> v;  # Initialise un tableau pour les données séparées.
+      char * token;  # Variable pour chaque segment.
+      char seps[] = ",";  # Délimiteur utilisé pour séparer les valeurs.
+      token = strtok (&str[0],seps);  # Premier segment extrait.
+      while (token != NULL) {  # Boucle jusqu'à épuisement des segments.
+        v.push_back(token);  # Ajoute le segment au tableau.
+        token = strtok (NULL, seps);  # Passe au segment suivant.
+      }
+      if (v.size() == 4) {  # Vérifie que 4 valeurs sont présentes.
+        return std::stof(v[2]);  # Retourne la salinité.
+      } 
+      else {
+        return NAN;  # Retourne "Non défini" si les données sont invalides.
+      }
+  - platform: template  # Capteur de densité spécifique, calculée à partir des données EC.
+    name: "Densité Spé"  # Nom affiché dans Home Assistant.
+    id: sensor_specific_gravity  # Identifiant unique pour ce capteur.
+    icon: mdi:cup-water  # Icône symbolisant la densité de l'eau.
+    unit_of_measurement: ""  # La densité spécifique est une grandeur sans unité.
+    accuracy_decimals: 3  # Précision à 3 décimales.
+    update_interval: "${update_ec}"  # Fréquence des mises à jour.
+    state_class: "measurement"  # Classe d'état utilisée.
+    device_class: "volatile_organic_compounds_parts"  # Classe de l'appareil.
+    lambda: |-
+      std::string str = id(raw_value_ec).state;  # Lit les valeurs brutes.
+      std::vector<std::string> v;  # Initialise un tableau pour les données séparées.
+      char * token;  # Variable pour chaque segment extrait.
+      char seps[] = ",";  # Délimiteur utilisé pour séparer les valeurs.
+      token = strtok (&str[0],seps);  # Premier segment extrait.
+      while (token != NULL) {  # Boucle jusqu'à épuisement des segments.
+        v.push_back(token);  # Ajoute le segment au tableau.
+        token = strtok (NULL, seps);  # Passe au segment suivant.
+      }
+      if (v.size() == 4) {  # Vérifie que 4 valeurs sont présentes.
+        return std::stof(v[3]);  # Retourne la densité spécifique (4e valeur).
+      } 
+      else {
+        return NAN;  # Retourne "Non défini" si les données sont invalides.
+      }
+
+text_sensor:  # Déclare des capteurs affichant du texte pour des diagnostics ou des états.
+  - platform: template
+    name: "Diagnostic densité"  # Diagnostic basé sur la densité calculée.
+    id: density_status  # Identifiant unique pour ce capteur textuel.
+    lambda: |-
+      float density = id(sensor_specific_gravity).state;  # Récupère l'état actuel de la densité.
+
+      if (density < 1.021) return {"DANGER : Trop faible (<1.021)"};  # Alarme si densité trop basse.
+      if (density > 1.026) return {"DANGER : Trop élevée (>1.026)"};  # Alarme si densité trop élevée.
+
+      if (density >= 1.021 && density <= 1.022) return {"Acceptable : Faible (1.021-1.022)"};  # Zone acceptable basse.
+      if (density >= 1.025 && density <= 1.026) return {"Acceptable : Élevée (1.025-1.026)"};  # Zone acceptable haute.
+
+      if (density >= 1.023 && density <= 1.025) return {"Correcte : Bonne (1.023-1.025)"};  # Densité dans la plage idéale.
+      if (density == 1.024) return {"Optimale : Parfaite (1.024)"};  # Densité optimale parfaite.
+
+      return {"Inconnu"};  # Message par défaut si aucune condition n'est remplie.
+    icon: mdi:water  # Icône représentant l'état de la densité.
+
+  - platform: template
+    name: "EC - Commande selectionée envoyée"  # Bouton pour envoyer une commande EZO préconfigurée.
+    id: send_selected_ec  # Identifiant unique du bouton.
+    entity_category: "Config"  # Catégorie de configuration dans Home Assistant.
+    on_press:
+      then:
+        - lambda: |-
+            // Analyse et exécution de la commande choisie.
+            if (id(select_command_ec).state == "Lire") {
+              id(ec_ezo).send_custom("R");
+            }
+            if (id(select_command_ec).state == "Information") {
+              id(ec_ezo).get_device_information();
+            }
+            if (id(select_command_ec).state == "Status") {
+              id(ec_ezo).send_custom("Status");
+            }
+            if (id(select_command_ec).state == "Obtenir valeur K sonde") {
+              id(ec_ezo).send_custom("K,?");
+            }  
+            if (id(select_command_ec).state == "Obtenir Valeur TDS") {
+              id(ec_ezo).send_custom("TDS,?");
+            }
+            if (id(select_command_ec).state == "Convert. TDS en NaCl - 0.48") {
+              id(ec_ezo).send_custom("TDS,0.48");
+            }
+            if (id(select_command_ec).state == "Obt. Paramètres") {
+              id(ec_ezo).send_custom("O,?");
+            }  
+            if (id(select_command_ec).state == "Definir Sonde K1") {
+              id(ec_ezo).send_custom("K,1");
+            }
+            if (id(select_command_ec).state == "Sortie Valeurs - Toutes (Par déf.)") {
+              id(ec_ezo).send_custom("O,EC,1");
+              id(ec_ezo).send_custom("O,TDS,1");
+              id(ec_ezo).send_custom("O,S,1");
+              id(ec_ezo).send_custom("O,SG,1");
+            }
+
+select:  # Déclaration des sélections permettant de choisir une commande spécifique.
+  - platform: template
+    name: "EC - Command Select"  # Nom de l'entité de sélection.
+    id: select_command_ec  # Identifiant unique de cette sélection.
+    optimistic: true  # Permet une mise à jour immédiate de l'état sélectionné sans attendre la confirmation du matériel.
+    entity_category: "Config"  # Catégorie de configuration pour organisation dans Home Assistant.
+    options:  # Liste des commandes disponibles.
+      - "Lire"  # Commande pour lire les données actuelles.
+      - "Information"  # Obtenir des informations sur l'appareil.
+      - "Status"  # Demander l'état actuel du capteur.
+      - "Obtenir valeur K sonde"  # Récupérer le coefficient de la sonde K.
+      - "Obtenir Valeur TDS"  # Demander les solides dissous totaux.
+      - "Convert. TDS en NaCl - 0.48"  # Conversion TDS en concentration de NaCl.
+      - "Obt. Paramètres"  # Demander les paramètres actuels.
+      - "Definir Sonde K1"  # Configurer la sonde avec un coefficient K de 1.
+      - "Sortie Valeurs - Toutes (Par déf.)"  # Sortir toutes les valeurs possibles.
+      - "Sortie Valeurs - Conductivité"  # Sortir uniquement la conductivité.
+      - "Sortie Valeurs - Salinité"  # Sortir uniquement la salinité.
+      - "Sortie Valeurs - Densité Spé"  # Sortir uniquement la densité spécifique.
+      - "Sortie Valeurs - TDS"  # Sortir uniquement les TDS.
+      - "Ctrl Calibration"  # Vérifier l'état de la calibration.
+      - "Calibration @ sec"  # Exécuter la calibration en mode sec.
+      - "Calibration @ basse = 12880"  # Calibration basse à 12880 µS/cm.
+      - "Calibration @ haute = 80000"  # Calibration haute à 80000 µS/cm.
+      - "Effacer calibration"  # Supprimer les données de calibration.
+    initial_option: "Ctrl Calibration"  # Option sélectionnée par défaut.
+    set_action:  # Action exécutée lorsqu'une option est sélectionnée.
+      - logger.log:  # Ajoute une entrée dans les logs pour indiquer la commande choisie.
+          format: "Chosen option: %s"
+          args: ["x.c_str()"]  # Affiche l'option sélectionnée.
+
+binary_sensor:
+  - platform: template  # Déclare un capteur binaire basé sur une condition.
+    name: "Densité dangereuse"  # Indique si la densité est hors des plages acceptables.
+    id: density_danger  # Identifiant unique du capteur.
+    lambda: |-
+      float density = id(sensor_specific_gravity).state;  # Récupère l'état de la densité spécifique.
+      return (density < 1.021 || density > 1.026);  # Retourne vrai si la densité est en dehors des limites.
+    device_class: problem  # Classe "problème", affichée dans Home Assistant comme une alerte.
+
+button:
+  # Commande pour lire la sonde
+  - platform: template
+    name: "EC - Lire"  # Bouton pour forcer une lecture de la sonde.
+    icon: mdi:read  # Icône représentant l'action de lecture.
+    id: read_ec  # Identifiant unique.
+    entity_category: "Config"  # Catégorie "Config" dans Home Assistant.
+    on_press:  # Action déclenchée lorsque le bouton est pressé.
+      then:
+        - lambda: |-
+            byte error;  # Variable pour détecter les erreurs.
+            Wire.beginTransmission(${addEC});  # Démarre une communication I2C avec l'adresse du capteur.
+            error = Wire.endTransmission();  # Termine la transmission et vérifie les erreurs.
+            if (error == 0) {  # Si aucune erreur n'est détectée.
+              id(ec_ezo).send_custom("R");  # Envoie une commande de lecture à la sonde.
+            } else {
+              ESP_LOGW("custom_conductivity_read", "Pas de capteur EC à cette adresse: ${addEC}!");  # Ajoute un avertissement dans les logs si le capteur n'est pas détecté.
+            }
+
+  # Commande pour envoyer une commande pré-sélectionnée à la sonde.
+  - platform: template
+    name: "EC - Commande selectionée envoyée"
+    id: send_selected_ec
+    entity_category: "Config"  # Catégorie de configuration.
+    on_press:
+      then:
+        - lambda: |-
+            // Exécute l'action en fonction de l'option sélectionnée dans "select_command_ec".
+            if (id(select_command_ec).state == "Lire") {
+              id(ec_ezo).send_custom("R");
+            }
+            if (id(select_command_ec).state == "Information") {
+              id(ec_ezo).get_device_information();
+            }
+            if (id(select_command_ec).state == "Status") {
+              id(ec_ezo).send_custom("Status");
+            }
+            if (id(select_command_ec).state == "Obtenir valeur K sonde") {
+              id(ec_ezo).send_custom("K,?");
+            }
+            if (id(select_command_ec).state == "Obtenir Valeur TDS") {
+              id(ec_ezo).send_custom("TDS,?");
+            }
+            if (id(select_command_ec).state == "Convert. TDS en NaCl - 0.48") {
+              id(ec_ezo).send_custom("TDS,0.48");
+            }
+            if (id(select_command_ec).state == "Obt. Paramètres") {
+              id(ec_ezo).send_custom("O,?");
+            }
+            if (id(select_command_ec).state == "Definir Sonde K1") {
+              id(ec_ezo).send_custom("K,1");
+            }
+            if (id(select_command_ec).state == "Sortie Valeurs - Toutes (Par déf.)") {
+              id(ec_ezo).send_custom("O,EC,1");
+              id(ec_ezo).send_custom("O,TDS,1");
+              id(ec_ezo).send_custom("O,S,1");
+              id(ec_ezo).send_custom("O,SG,1");
+            }
+            if (id(select_command_ec).state == "Sortie Valeurs - Conductivité") {
+              id(ec_ezo).send_custom("O,EC,1");
+              id(ec_ezo).send_custom("O,TDS,0");
+              id(ec_ezo).send_custom("O,S,0");
+              id(ec_ezo).send_custom("O,SG,0");
+            }
+            if (id(select_command_ec).state == "Salinité") {
+              id(ec_ezo).send_custom("O,EC,0");
+              id(ec_ezo).send_custom("O,TDS,0");
+              id(ec_ezo).send_custom("O,S,1");
+              id(ec_ezo).send_custom("O,SG,0");
+            }
+            if (id(select_command_ec).state == "Sortie Valeurs - Densité Spé") {
+              id(ec_ezo).send_custom("O,EC,0");
+              id(ec_ezo).send_custom("O,TDS,0");
+              id(ec_ezo).send_custom("O,S,0");
+              id(ec_ezo).send_custom("O,SG,1");
+            }
+            if (id(select_command_ec).state == "Sortie Valeurs - TDS") {
+              id(ec_ezo).send_custom("O,EC,0");
+              id(ec_ezo).send_custom("O,TDS,1");
+              id(ec_ezo).send_custom("O,S,0");
+              id(ec_ezo).send_custom("O,SG,0");
+            }
+            if (id(select_command_ec).state == "Ctrl Calibration") {
+              id(ec_ezo).get_calibration();  # Vérifie l'état actuel de la calibration du capteur.
+            }  
+            if (id(select_command_ec).state == "Calibration @ sec") {
+              id(ec_ezo).send_custom("Cal,dry");  # Commande pour calibration à sec.
+            }
+            if (id(select_command_ec).state == "Calibration @ basse = 12880") {
+              id(ec_ezo).send_custom("Cal,low,12880");  # Calibration pour une conductivité basse.
+            }
+            if (id(select_command_ec).state == "Calibration @ haute = 80000") {
+              id(ec_ezo).send_custom("Cal,high,80000");  # Calibration pour une conductivité élevée.
+            }
+            if (id(select_command_ec).state == "Effacer calibration") {
+              id(ec_ezo).clear_calibration();  # Réinitialise la calibration en supprimant les données existantes.
+            }
+
+logger:  # Configuration du système de journalisation.
+  level: DEBUG  # Niveau de détail des logs (peut être ajusté pour réduire les messages, par exemple à INFO ou WARNING).
+  logs:  # Déclaration des modules spécifiques pour lesquels les logs sont activés.
+    i2c: INFO  # Active les informations pour les interactions I2C.
+    sensor: DEBUG  # Active les logs détaillés pour les capteurs.

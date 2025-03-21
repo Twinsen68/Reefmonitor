@@ -1,0 +1,11 @@
+packages:  # Inclut des fichiers YAML externes pour modularité et réutilisation.
+  device_base: !include common/device_base.yaml  # Contient les configurations de base du périphérique.
+  raphsreef: !include common/raphsreef.yaml  # Fichier spécifique au projet raphsreef.
+  optical: !include common/optical.yaml  # Gestion des capteurs optiques (par exemple, pour mesurer le niveau d'eau).
+  ezo_ph: !include common/ezo_ph.yaml  # Intègre les sondes pH EZO pour surveiller l'acidité de l'eau.
+  ezo_ec: !include common/ezo_ec.yaml  # Intègre les sondes EZO pour la conductivité électrique (EC).
+  ezo_orp: !include common/ezo_orp.yaml  # Intègre les sondes EZO pour le potentiel rédox (ORP).
+  substitutions: !include common/substitutions.yaml  # Centralise les variables réutilisées entre les fichiers.
+  temperature_dallas: !include common/temperature_dallas.yaml  # Référence répétée pour assurer la modularité.
+  ota_https: !include common/ota_https.yaml  # Active les mises à jour OTA (Over-The-Air) sécurisées via HTTPS.
+  debug: !include common/debug.yaml  # Inclut une configuration pour le débogage (logs détaillés, etc.).

@@ -1,0 +1,51 @@
+debug:
+  update_interval: 5s  # Déclare un intervalle global pour les mises à jour de débogage (toutes les 5 secondes).
+
+text_sensor:  # Définition des capteurs de type "texte".
+  - platform: debug  # Utilise la plateforme de débogage intégrée.
+    device:
+      name: "Device Info"  # Affiche des informations sur l'appareil.
+    reset_reason:
+      name: "Reset Reason"  # Indique la raison du dernier redémarrage de l'appareil.
+
+sensor:  # Déclaration des capteurs physiques ou virtuels.
+  - platform: wifi_signal  # Capteur pour mesurer la force du signal Wi-Fi.
+    name: "Signal Wi-Fi (dB)"  # Nom affiché dans l'interface utilisateur.
+    id: wifi_signal_db  # Identifiant unique pour ce capteur.
+    update_interval: 60s  # Met à jour la valeur toutes les 60 secondes.
+    icon: mdi:wifi  # Icône personnalisée (issue de Material Design Icons).
+    unit_of_measurement: "dB"  # Unité utilisée pour afficher la mesure.
+
+  - platform: debug  # Utilise la plateforme de débogage pour surveiller des paramètres internes.
+    free:
+      name: "Heap Free"  # Mémoire libre disponible dans le tas (Heap).
+    block:
+      name: "Heap Max Block"  # Taille maximale d'un bloc libre dans le tas.
+    loop_time:
+      name: "Loop Time"  # Temps moyen d'exécution d'une boucle principale (itération) de l'ESP.
+
+binary_sensor:  # Déclaration de capteurs binaires (ON/OFF).
+  - platform: status  # Capteur surveillant l'état général de l'ESPHome.
+    name: "Statut ESPHome"  # Nom affiché dans l'interface utilisateur.
+
+  - platform: template  # Capteur personnalisé basé sur une logique définie par l'utilisateur.
+    name: "Statut Wi-Fi"  # Nom affiché dans l'interface utilisateur.
+    id: wifi_status  # Identifiant unique pour ce capteur.
+    lambda: |-  # Code C++ personnalisé pour définir la logique du capteur.
+      if (id(wifi_signal_db).state > -80) {  # Vérifie si le signal Wi-Fi est supérieur à -80 dB.
+        return true;  # Renvoie "true" pour un bon signal.
+      } else {
+        return false;  # Renvoie "false" pour un signal faible ou une déconnexion.
+      }
+    device_class: connectivity  # Classe de l'appareil (décrit la connectivité dans Home Assistant).
+
+interval:  # Définition d'actions répétées à intervalle régulier.
+  - interval: 5min  # Exécute le bloc suivant toutes les 5 minutes.
+    then:
+      - if:  # Condition pour vérifier l'état de la connexion Wi-Fi.
+          condition:
+            wifi.connected: false  # Vérifie si le Wi-Fi est déconnecté.
+          then:
+            - logger.log: "Wi-Fi non connecté. Redémarrage en cours..."  # Ajoute un message dans les logs.
+            - delay: 30s  # Attend 30 secondes avant d'agir.
+            - reboot:  # Redémarre l'ESP pour tenter de rétablir la connexion.

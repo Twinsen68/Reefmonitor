@@ -1,0 +1,313 @@
+substitutions:  
+  # Pins des capteurs optiques
+  opticalLowPin: "33"  # GPIO utilisé pour le capteur optique de niveau bas.
+  opticalHighPin: "32"  # GPIO utilisé pour le capteur optique de niveau haut.
+
+  # Fréquence de mise à jour
+  update_water: "60s"  # Intervalle de mise à jour des états des capteurs optiques.
+
+  # Capteur de débit
+  flowSensorPin: "26"  # GPIO utilisé pour le capteur de débit.
+  pulses_per_litre: "450"  # Nombre d'impulsions par litre d'eau.
+  update_interval: "10s"  # Intervalle de mise à jour pour le débit.
+
+esphome:
+  on_boot: 
+    priority: 200  # Priorité moyenne pour garantir que ces actions s'exécutent rapidement.
+    then:
+      - component.update: water_level  # Met à jour l'état des niveaux d'eau au démarrage.
+
+switch:
+  # Contrôle direct de l'électrovanne.
+  - platform: output
+    name: "Électrovanne"  # Nom visible dans Home Assistant.
+    output: relais_valve  # Défini dans la section `output`.
+    id: electrovanne  # Identifiant unique.
+    icon: mdi:valve  # Icône pour représenter une vanne.
+
+  # Contrôle manuel de l'électrovanne via Home Assistant.
+  - platform: template
+    name: "Contrôle manuel de l'électrovanne"  # Nom affiché dans Home Assistant.
+    id: manual_valve_control  # Identifiant unique pour ce contrôle.
+    optimistic: true  # Synchronisation immédiate de l'état.
+    turn_on_action:
+      - switch.turn_on: electrovanne  # Ouvre l'électrovanne.
+      - lambda: |-
+          ESP_LOGI("manual_valve", "Électrovanne ouverte manuellement.");
+    turn_off_action:
+      - switch.turn_off: electrovanne  # Ferme l'électrovanne.
+      - lambda: |-
+          ESP_LOGI("manual_valve", "Électrovanne fermée manuellement.");
+
+output:
+  - platform: gpio
+    pin: 25  # GPIO pour activer ou désactiver l'électrovanne.
+    id: relais_valve  # Identifiant unique pour l'output.
+
+binary_sensor:
+  - platform: gpio
+    id: os_low  # Identifiant unique pour le capteur bas.
+    pin: 
+      number: ${opticalLowPin}  # GPIO défini dans les substitutions.
+      inverted: true  # Inverse la logique (signal actif = niveau haut).
+      mode:
+        input: true
+        pullup: true  # Active un pull-up interne pour stabiliser le signal.
+    name: "Capteur niveau : Bas"  # Nom affiché dans Home Assistant.
+    filters:
+      - delayed_on_off: 30ms  # Ajoute un délai pour éviter les faux déclenchements (anti-rebond).
+    on_state:
+      then:
+        - component.update: water_level  # Met à jour l'état global des niveaux d'eau.
+        - if:
+            condition:
+              binary_sensor.is_off: os_low  # Si le niveau d'eau est trop bas.
+            then:
+              - switch.turn_on: electrovanne  # Active l'électrovanne.
+        - if:
+            condition:
+              binary_sensor.is_on: os_low  # Si le niveau est corrigé.
+            then:
+              - switch.turn_off: electrovanne  # Désactive l'électrovanne.
+
+  - platform: gpio
+    id: os_high  # Identifiant unique pour le capteur haut.
+    pin: 
+      number: ${opticalHighPin}  # GPIO défini dans les substitutions.
+      inverted: true  # Inverse la logique (signal actif = niveau haut).
+      mode:
+        input: true
+        pullup: true
+    name: "Capteur niveau : Haut"  # Nom affiché dans Home Assistant.
+    filters:
+      - delayed_on_off: 30ms  # Anti-rebond pour éviter les faux déclenchements.
+    on_state:
+      then:
+        - component.update: water_level  # Met à jour l'état global des niveaux d'eau.
+
+  # Anomalie : Volume excessif ajouté
+  - platform: template
+    name: "Anomalie : Volume excessif"  # Alerte si plus de 10L sont ajoutés dans une session.
+    id: volume_anomaly  # Identifiant unique.
+    lambda: |-
+      static float session_volume = 0;  // Volume ajouté durant une session.
+      if (id(electrovanne).state) {
+        session_volume += (id(flow_pulses).state / ${pulses_per_litre});  // Conversion des impulsions en litres.
+        if (session_volume > 10.0) {  // Si le volume dépasse 10L.
+          if (id(auto_close_enabled).state) {  // Si la fermeture automatique est activée.
+            id(electrovanne).turn_off();  // Ferme automatiquement la vanne.
+          }
+          return true;  // Déclenche une alerte.
+        }
+      } else {
+        session_volume = 0;  // Réinitialise le volume si la vanne est fermée.
+      }
+      return false;  // Pas d'anomalie.
+    device_class: problem  # Classifié comme problème dans Home Assistant.
+
+  # Anomalie : Vanne ouverte sans débit
+  - platform: template
+    name: "Anomalie : Vanne ouverte sans débit"  # Déclenche une alerte si la vanne est ouverte sans débit détecté.
+    id: no_flow_anomaly  # Identifiant unique.
+    lambda: |-
+      static unsigned long anomaly_start = 0;  // Temps de début de l'anomalie.
+      if (id(electrovanne).state && (id(flow_pulses).state == 0)) {  // Si la vanne est ouverte mais sans débit.
+        if (anomaly_start == 0) {
+          anomaly_start = millis();  // Initialise le temps d'anomalie.
+        }
+        if ((millis() - anomaly_start) > 10000) {  // Détection après 10 secondes.
+          return true;  // Signale une anomalie.
+        }
+      } else {
+        anomaly_start = 0;  // Réinitialise si le débit est détecté ou la vanne fermée.
+      }
+      return false;  // Pas d'anomalie.
+    device_class: problem  # Classifié comme problème.
+
+  # Anomalie : Débit détecté avec vanne fermée
+  - platform: template
+    name: "Anomalie : Débit avec vanne fermée"  # Déclenche une alerte si un débit est détecté alors que la vanne est fermée.
+    id: flow_with_closed_valve  # Identifiant unique.
+    lambda: |-
+      if (!id(electrovanne).state && (id(flow_pulses).state > 0)) {  // Vérifie si débit avec vanne fermée.
+        return true;  // Signale une anomalie.
+      }
+      return false;  // Pas d'anomalie.
+    device_class: problem  # Classifié comme problème.
+
+sensor:
+  - platform: pulse_counter
+    pin: ${flowSensorPin}  # GPIO utilisé pour le capteur de débit.
+    name: "Impulsions du capteur de débit"  # Nom affiché dans Home Assistant.
+    id: flow_pulses  # Identifiant unique.
+    update_interval: ${update_interval}  # Fréquence de mise à jour.
+    unit_of_measurement: "pulses"  # Unité pour les données affichées.
+    filters:
+      - multiply: 1.0  # Pas de transformation appliquée.
+
+  # Calcul du volume d'eau ajouté (en litres)
+  - platform: template
+    name: "Volume d'eau ajouté"  # Calcul du volume d'eau ajouté en litres.
+    id: volume_added  # Identifiant unique.
+    unit_of_measurement: "L"  # Unité de mesure : litres.
+    icon: mdi:water  # Icône utilisée.
+    update_interval: ${update_interval}  # Fréquence de mise à jour.
+    lambda: |-
+      return (id(flow_pulses).state / ${pulses_per_litre});  // Convertit les impulsions en litres.
+
+  # Calcul du volume ajouté par jour
+  - platform: integration
+    name: "Volume ajouté - Jour"  # Suivi du volume ajouté quotidiennement.
+    sensor: volume_added  # Source des données.
+    unit_of_measurement: "L"  # Unité : litres.
+    icon: mdi:calendar  # Icône pour une vue journalière.
+    time_unit: d  # Données accumulées quotidiennement.
+
+  # Calcul manuel du volume ajouté par semaine
+  - platform: template
+    name: "Volume ajouté - Semaine"  # Suivi du volume hebdomadaire.
+    id: volume_week
+    unit_of_measurement: "L"
+    icon: mdi:calendar-week
+    lambda: |-
+      static float weekly_volume = 0;  // Variable pour stocker le volume hebdomadaire.
+      weekly_volume += id(volume_added).state;  // Incrémente avec les nouvelles données.
+      return weekly_volume;  // Retourne le volume cumulé.
+
+  # Volume total ajouté depuis le démarrage
+  - platform: template
+    name: "Volume ajouté - Total"  # Suivi du volume total depuis le démarrage.
+    id: volume_total
+    unit_of_measurement: "L"
+    icon: mdi:water-plus
+    lambda: |-
+      static float total_volume = 0;  // Variable pour stocker le volume total.
+      total_volume += id(volume_added).state;  // Ajoute le volume à chaque mise à jour.
+      return total_volume;  // Retourne le volume total.
+
+text_sensor:
+  # État global du niveau d'eau
+  - platform: template
+    icon: mdi:waves-arrow-up  # Icône pour le niveau d'eau.
+    name: "Niveau d'eau"  # État global du niveau d'eau.
+    id: water_level  # Identifiant unique.
+    update_interval: "${update_water}"  # Fréquence de mise à jour.
+    lambda: |-
+      if(id(os_high).state == true && id(os_low).state == true) {
+        return {"Trop haut"};  # Si les deux capteurs sont actifs.
+      }
+      if(id(os_high).state == false && id(os_low).state == false) {
+        return {"Trop bas"};  # Si aucun capteur n'est actif.
+      }
+      if(id(os_high).state == false && id(os_low).state == true) {
+        return {"Optimal"};  # Niveau correct.
+      } else {
+        return {"Inconnu ou erreur"};  # État indéterminé.
+
+  - platform: template
+    name: "État de l'électrovanne"  # Indique si la vanne est active ou non.
+    lambda: |-
+      if (id(electrovanne).state) {
+        return {"Active"};  # Vanne ouverte.
+      } else {
+        return {"Inactive"};  # Vanne fermée.
+      }
+    icon: mdi:valve
+
+  - platform: template
+    name: "Mode de contrôle de l'électrovanne"  # Indique si le mode est automatique ou manuel.
+    lambda: |-
+      if (id(auto_close_enabled).state) {
+        return {"Automatique"};  # Mode automatique activé.
+      } else {
+        return {"Manuel"};  # Mode manuel activé.
+      }
+    icon: mdi:toggle-switch
+
+button:
+  # Réinitialise tous les volumes (journaliers, hebdomadaires, totaux)
+  - platform: template
+    name: "Réinitialiser tous les volumes"  # Réinitialise les volumes (journaliers, hebdomadaires, totaux).
+    id: reset_all_volumes  # Identifiant unique.
+    on_press:
+      then:
+        - lambda: |-
+            id(flow_pulses).publish_state(0);  # Réinitialise les impulsions
+            id(volume_total).publish_state(0);  # Réinitialise le volume total
+            id(volume_week).publish_state(0);  # Réinitialise le volume hebdomadaire
+            ESP_LOGI("reset", "Tous les volumes ont été réinitialisés !");
+
+  # Active ou désactive la fermeture automatique de l'électrovanne
+  - platform: template
+    name: "Activer/Désactiver Auto-Fermeture"  # Bouton pour basculer le mode automatique.
+    id: auto_close_toggle  # Identifiant unique.
+    on_press:
+      then:
+        - lambda: |-
+            id(auto_close_enabled).publish_state(!id(auto_close_enabled).state);  // Change l'état
+            ESP_LOGI("auto_close", "État changé : %s", id(auto_close_enabled).state ? "Activé" : "Désactivé");
+
+globals:
+  # Variable pour gérer l'état de l'auto-fermeture de l'électrovanne
+  - id: auto_close_enabled  # Identifiant unique de la variable
+    type: bool  # Type de la variable (booléen : vrai ou faux)
+    restore_value: true  # La valeur est sauvegardée et restaurée après un redémarrage
+    initial_value: "true"  # La variable est initialisée à "true" par défaut
+
+  - id: manual_override_timeout  # Identifiant unique pour la variable.
+    type: unsigned long  # Type de données : durée en millisecondes.
+    restore_value: no  # Ne pas restaurer après redémarrage (pour éviter des incohérences).
+    initial_value: "0"  # Initialise la variable à zéro.
+
+select:
+  - platform: template
+    name: "Durée avant retour auto"  # Nom affiché dans Home Assistant.
+    id: auto_reset_duration  # Identifiant utilisé dans le code ESPHome.
+    optimistic: true  # Synchronisation sans retour d'état direct de l'appareil.
+    options:
+      - "10 minutes"  # Option pour 10 minutes.
+      - "30 minutes"  # Option pour 30 minutes.
+      - "1 heure"  # Option pour 1 heure.
+      - "6 heures"  # Option pour 6 heures.
+      - "1 jour"  # Option pour 1 jour.
+      - "2 jours"  # Option pour 2 jours.
+    initial_option: "30 minutes"  # Option par défaut.
+    set_action:
+      - logger.log:
+          format: "Durée sélectionnée pour retour automatique : %s"  # Log de débogage.
+          args: ["x.c_str()"]  # Affiche la valeur sélectionnée.
+
+interval:
+  - interval: 1s  # Vérification de l'état toutes les secondes.
+    then:
+      - lambda: |-
+          static unsigned long override_start_time = 0;  // Heure de début de la désactivation manuelle.
+          static unsigned long duration = 0;  // Durée en millisecondes pour l'override.
+
+          // 1. Convertir la durée sélectionnée en millisecondes.
+          if (id(auto_reset_duration).state == "10 minutes") {
+            duration = 600000;  // 10 minutes.
+          } else if (id(auto_reset_duration).state == "30 minutes") {
+            duration = 1800000;  // 30 minutes.
+          } else if (id(auto_reset_duration).state == "1 heure") {
+            duration = 3600000;  // 1 heure.
+          } else if (id(auto_reset_duration).state == "6 heures") {
+            duration = 21600000;  // 6 heures.
+          } else if (id(auto_reset_duration).state == "1 jour") {
+            duration = 86400000;  // 1 jour.
+          } else if (id(auto_reset_duration).state == "2 jours") {
+            duration = 172800000;  // 2 jours.
+
+          // 2. Si l'électrovanne est désactivée manuellement, démarrez le chronomètre.
+          if (!id(electrovanne).state && id(manual_override_timeout) == 0) {
+            override_start_time = millis();  // Enregistre l'heure actuelle.
+            id(manual_override_timeout) = duration;  // Définit la durée de l'override.
+          }
+
+          // 3. Vérifiez si la durée d'override est écoulée.
+          if (id(manual_override_timeout) > 0 &&
+              (millis() - override_start_time) >= id(manual_override_timeout)) {
+            id(manual_override_timeout) = 0;  // Réinitialise la variable.
+            id(auto_close_enabled).publish_state(true);  // Réactive le mode automatique.
+            ESP_LOGI("auto_reset", "Retour automatique en mode automatique.");
+          }

@@ -1,0 +1,49 @@
+substitutions:
+  # Import Config
+  import_config: "true"  # Active ou désactive l'importation de configurations externes.
+  # Logger Level - Can use VERBOSE for more information in Logs
+  # I2C pins
+
+  # Déclare des variables globales pour simplifier la configuration et centraliser les modifications.
+  # names
+  name: "raphsreef"  # Identifiant unique pour le nœud ESPHome.
+  friendly_name: "raphsreef"  # Nom convivial pour afficher l'appareil dans Home Assistant.
+  # App Version - Updated: 6/2024
+  app_version: "24.8.1"  # Version de l'application ou du firmware, utile pour le suivi des mises à jour.
+  # Noms pour le périphérique
+
+  # Niveau du journal
+  logger: "DEBUG"  # Définit le niveau de détail des logs (VERBOSE pour un débogage complet).
+  # Pins pour les capteurs optiques
+  opticalLowPin: "32"  # GPIO pour le capteur de niveau bas.
+  opticalHighPin: "33"  # GPIO pour le capteur de niveau haut.
+  dallasPin: "16"  # GPIO pour les capteurs Dallas de type DS18B20.
+
+  # Pins pour le bus I2C
+  sdaPin: "21"  # GPIO SDA du bus I2C (données).
+  sclPin: "22"  # GPIO SCL du bus I2C (horloge).
+
+  # Adresses des circuits I2C
+  # pH circuit, who's address is 99
+  addPH: "99"  # Adresse pour le circuit EZO pH.
+  # EC circuit, who's address is 100
+  addEC: "100"  # Adresse pour le circuit EZO de conductivité.
+  # DO circuit, who's address is 97
+
+  # Variables de calibration pour les capteurs de température
+  # Calibration Temp. 1
+  cal_0: "0.0"  # Point de calibration à 0°C (eau glacée).
+  cal_100: "100.0"  # Point de calibration à 100°C (eau bouillante).
+  # Calibration Temp. 2 (pour un second capteur, si applicable)
+  cal_0_2: "0.0"  # Point de calibration à 0°C.
+  cal_100_2: "100.0"  # Point de calibration à 100°C.
+
+  # Intervalles pour la mise à jour des capteurs
+  # Niveaux d'eau
+  update_water: "60s"  # Fréquence de mise à jour pour les capteurs de niveau d'eau.
+  # Capteurs de température
+  update_temp: "60s"  # Fréquence de mise à jour des capteurs Dallas.
+  # EZO Circuits
+  update_ph: "60s"  # Fréquence de mise à jour pour le pH.
+  update_ec: "60s"  # Fréquence de mise à jour pour la conductivité.
+  update_button_ec: "60s"  # Intervalle pour les boutons EC.

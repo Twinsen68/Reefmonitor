@@ -1,0 +1,149 @@
+substitutions:  # Définit des variables réutilisables pour simplifier la configuration.
+  # ORP circuit, who's address is 98
+  addORP: "98"  # Adresse I2C du capteur EZO ORP.
+  update_orp: "60s"  # Intervalle de mise à jour des mesures d'ORP.
+
+api:
+  services:  # Liste des services personnalisés exposés à Home Assistant.
+    - service: orp_read_continous  # Service pour lire les données d'ORP en continu.
+      then:
+      - repeat:
+          count: 60  # Lit les données 60 fois.
+          then:
+          - button.press: read_orp  # Active un bouton pour lire les données.
+          - delay: 1s  # Ajoute un délai d'une seconde entre chaque lecture.
+
+    - service: orp_calibrate_225  # Service pour calibrer le capteur à 225 mV.
+      then:
+      - lambda: |-
+          id(orp_ezo).send_custom("Cal,225");  # Commande spécifique de calibration.
+
+    # Sections commentées pour définir des services personnalisés supplémentaires.
+    # Ces lignes peuvent être décommentées si nécessaires pour des usages spécifiques.
+    # - service: orp_calibrate_custom
+    #   variables:
+    #     value: int
+    #   then:
+    #   - lambda: |-
+    #       id(orp_ezo).send_custom(Cal,value);
+
+    # - service: ezo_orp_custom_command
+    #   variables:
+    #     command: string
+    #   then:
+    #     - lambda: |-
+    #         id(orp_ezo).send_custom(command);
+
+esphome:
+  on_boot:  # Actions exécutées au démarrage du microcontrôleur.
+    priority: 800  # Priorité élevée pour s'assurer que ces actions s'exécutent rapidement.
+    then:
+      - button.press: send_selected_orp  # Envoie une commande pré-sélectionnée à la sonde.
+
+sensor:
+  - platform: ezo  # Plateforme ESPHome pour les capteurs EZO.
+    icon: mdi:react  # Icône représentant les réactions chimiques (ORP).
+    name: "ORP"  # Nom affiché dans Home Assistant.
+    id: orp_ezo  # Identifiant unique pour ce capteur.
+    address: ${addORP}  # Adresse I2C du capteur définie dans les substitutions.
+    unit_of_measurement: mV  # Unité de mesure (millivolts).
+    accuracy_decimals: 1  # Précision à un chiffre après la virgule.
+    update_interval: "${update_orp}"  # Intervalle de mise à jour des données.
+    state_class: "measurement"  # Classe d'état indiquant une mesure continue.
+    device_class: voltage  # Classe d'appareil : mesure de tension (mV pour l'ORP).
+    on_custom:  # Actions exécutées lors de la réception de données personnalisées.
+      then:
+        - lambda: 
+            id(result_orp).publish_state(x);  # Publie la valeur mesurée.
+    on_calibration:  # Actions exécutées après une calibration réussie.
+      then:
+        - lambda: 
+            id(result_orp).publish_state(x);  # Met à jour les résultats dans le capteur textuel.
+    on_device_information:  # Actions exécutées lors de la récupération d'informations sur l'appareil.
+      then:
+        - lambda: 
+            id(result_orp).publish_state(x);  # Publie les informations récupérées.
+    on_slope:  # Actions exécutées lorsque l'inclinaison est mesurée.
+      then:
+        - lambda: 
+            id(result_orp).publish_state(x);  # Publie la valeur d'inclinaison.
+    on_t:  # Actions exécutées lorsque la température est reçue.
+      then:
+        - lambda: 
+            id(result_orp).publish_state(x);  # Publie la température si disponible.
+
+text_sensor:
+  # Capteur textuel pour afficher le résultat d'une commande spécifique.
+  - platform: template
+    name: ORP - Valeur Commande  # Affiche le résultat d'une commande envoyée.
+    icon: mdi:data-matrix  # Icône symbolisant une matrice de données.
+    id: result_orp  # Identifiant unique pour ce capteur.
+    # disabled_by_default: true  # Option pour désactiver par défaut (commentée ici).
+
+button:
+  - platform: template
+    name: ORP - Lire  # Bouton pour forcer une lecture manuelle de la sonde ORP.
+    id: read_orp  # Identifiant unique du bouton.
+    icon: mdi:read  # Icône représentant une action de lecture.
+    entity_category: "Config"  # Catégorie de configuration dans Home Assistant.
+    on_press:
+      then:
+        - lambda: |-
+            byte error;  # Variable pour capturer les erreurs potentielles.
+            id(orp_ezo).send_custom("R");  # Envoie une commande de lecture.
+            error = Wire.endTransmission();  # Termine la communication et détecte les erreurs.
+            if (error == 0) {  # Si aucune erreur n'est détectée.
+              id(orp_ezo).send_custom("R");  # Réitère la commande de lecture.
+            }
+            else {
+              ESP_LOGW("custom_orp_read", "No ORP sensor detected at address: ${addORP}!!");  # Avertit si le capteur n'est pas détecté.
+            }
+
+  - platform: template
+    name: ORP - Commande selectionée envoyée  # Bouton pour envoyer une commande préconfigurée.
+    id: send_selected_orp  # Identifiant unique du bouton.
+    entity_category: "Config"  # Catégorie de configuration.
+    on_press:
+      then:
+        - lambda: |-
+            if (id(select_command_orp).state == "Lire") {
+              id(orp_ezo).send_custom("R");  # Commande pour lire les données.
+            }
+            if (id(select_command_orp).state == "Information") {
+              id(orp_ezo).get_device_information();  # Commande pour récupérer des informations sur l'appareil.
+            }
+            if (id(select_command_orp).state == "Status") {
+              id(orp_ezo).send_custom("Status");  # Commande pour obtenir l'état actuel.
+            }
+            if (id(select_command_orp).state == "Vérifier Calibration") {
+              id(orp_ezo).get_calibration();  # Vérifie l'état de la calibration.
+            }  
+            if (id(select_command_orp).state == "Calibration @ 225 mV") {
+              id(orp_ezo).send_custom("Cal,225");  # Effectue la calibration à 225 mV.
+            }
+            if (id(select_command_orp).state == "Effacer Calibration") {
+              id(orp_ezo).clear_calibration();  # Réinitialise la calibration.
+            }
+            // else {
+            //   id(orp_ezo).send_custom("R");
+            // }
+
+select:
+  - platform: template
+    name: ORP - Command Select  # Menu déroulant pour choisir une commande ORP.
+    id: select_command_orp  # Identifiant unique pour cet élément.
+    optimistic: true  # Applique immédiatement l'option sélectionnée sans attendre une confirmation.
+    entity_category: "Config"  # Catégorie de configuration dans Home Assistant.
+    options:  # Liste des commandes disponibles.
+      - "Lire"  # Commande pour lire les données ORP.
+      - "Information"  # Commande pour récupérer les informations du capteur.
+      - "Status"  # Commande pour obtenir l'état actuel.
+      - "Vérifier Calibration"  # Vérifie l'état de la calibration.
+      - "Calibration @ 225 mV"  # Effectue une calibration à 225 mV.
+      - "Effacer Calibration"  # Réinitialise la calibration.
+    initial_option: "Vérifier Calibration"  # Option sélectionnée par défaut.
+    set_action:  # Actions exécutées lorsqu'une option est sélectionnée.
+      - logger.log:
+          format: "Chosen option: %s"  # Ajoute une entrée dans les logs pour indiquer l'option choisie.
+          args: ["x.c_str()"]  # Affiche l'option sélectionnée dans les logs.
+
