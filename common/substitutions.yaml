@@ -1,49 +1,72 @@
 substitutions:
-  # Import Config
-  import_config: "true"  # Active ou désactive l'importation de configurations externes.
-  # Logger Level - Can use VERBOSE for more information in Logs
-  # I2C pins
-
-  # Déclare des variables globales pour simplifier la configuration et centraliser les modifications.
   # names
-  name: "reefmonitor"  # Identifiant unique pour le nœud ESPHome.
-  friendly_name: "reefmonitor"  # Nom convivial pour afficher l'appareil dans Home Assistant.
-  # App Version - Updated: 6/2024
-  app_version: "24.8.1"  # Version de l'application ou du firmware, utile pour le suivi des mises à jour.
-  # Noms pour le périphérique
+  name: "aquapi"
+  friendly_name: "AquaPi"
+  # Logger Level - Can use VERBOSE for more information in Logs
+  logger: "DEBUG"
 
-  # Niveau du journal
-  logger: "DEBUG"  # Définit le niveau de détail des logs (VERBOSE pour un débogage complet).
-  # Pins pour les capteurs optiques
-  opticalLowPin: "32"  # GPIO pour le capteur de niveau bas.
-  opticalHighPin: "33"  # GPIO pour le capteur de niveau haut.
-  dallasPin: "16"  # GPIO pour les capteurs Dallas de type DS18B20.
+  # pins
+  opticalLowPin: "32" # yellow
+  opticalHighPin: "33" # blue
+  auxPin1: "26" # blue
+  auxPin2: "27" # yellow
+  dallasPin: "16"
 
-  # Pins pour le bus I2C
-  sdaPin: "21"  # GPIO SDA du bus I2C (données).
-  sclPin: "22"  # GPIO SCL du bus I2C (horloge).
-
-  # Adresses des circuits I2C
+  sdaPin: "21" # blue
+  sclPin: "22" # yellow
+  
+  # EZO Circuit I2C Addresses
   # pH circuit, who's address is 99
-  addPH: "99"  # Adresse pour le circuit EZO pH.
+  addPH: "99"
   # EC circuit, who's address is 100
-  addEC: "100"  # Adresse pour le circuit EZO de conductivité.
+  addEC: "100"
   # DO circuit, who's address is 97
+  addDO: "97"
+  # RTD circuit, who's address is 102
+  addRTD: "102"
+  # PMP circuit, who's address is 103
+  addPMP: "103"
+  # HUM circuit, who's address is 111
+  addHUM: "111"
+  # CO2 circuit, who's address is 105
+  addCO2: "105"
 
-  # Variables de calibration pour les capteurs de température
+  # PMP circuit addresses
+  addPMP: "103" # White
+  addPMPWaste: "108" # Red - Waste Water
+  addPMPClean: "109" # Green - Clean Water
+  addPMP_2: "110" # Orange
+  addPMP_3: "104" # Yellow
+  addPMP_4: "106" # Blue
+
+  # Calibration variables
+  # 0C using Ice Water; 100C using Boiling Water
   # Calibration Temp. 1
-  cal_0: "0.0"  # Point de calibration à 0°C (eau glacée).
-  cal_100: "100.0"  # Point de calibration à 100°C (eau bouillante).
-  # Calibration Temp. 2 (pour un second capteur, si applicable)
-  cal_0_2: "0.0"  # Point de calibration à 0°C.
-  cal_100_2: "100.0"  # Point de calibration à 100°C.
+  cal_0: "0.0"
+  cal_100: "100.0"
+  # Calibration Temp. 2
+  cal_0_2: "0.0"
+  cal_100_2: "100.0"
 
-  # Intervalles pour la mise à jour des capteurs
-  # Niveaux d'eau
-  update_water: "60s"  # Fréquence de mise à jour pour les capteurs de niveau d'eau.
-  # Capteurs de température
-  update_temp: "60s"  # Fréquence de mise à jour des capteurs Dallas.
-  # EZO Circuits
-  update_ph: "60s"  # Fréquence de mise à jour pour le pH.
-  update_ec: "60s"  # Fréquence de mise à jour pour la conductivité.
-  update_button_ec: "60s"  # Intervalle pour les boutons EC.
+  # Sensor update intevals. 60s = 1 minute, never = disable updates
+  # Water Level
+  update_water: "60s"
+  # Temp. Probes
+  update_temp: "60s"
+  # EZO pH
+  update_ph: "60s"
+  # EZO EC
+  update_ec: "60s"
+  update_button_ec: "60s"
+  # EZO DO
+  update_do: "60s"
+  # EZO RTD
+  update_rtd: "60s"
+  # EZO PMP
+  update_pmp: "60s"
+  # EZO HUM
+  update_hum: "60s"
+  update_button_hum: "60s"
+  # EZO CO2
+  update_co2: "60s"
+  update_button_co2: "60s"
