@@ -9,7 +9,7 @@ substitutions:
 web_server:
   sorting_groups:
     - id: sorting_group_ec
-      name: "Salinity - EZO"
+      name: "Salinité - EZO"
       sorting_weight: ${sorting_group_ec}
 
 api:
@@ -85,7 +85,7 @@ sensor:
   # Conductivity
   - platform: ezo
     icon: mdi:shaker-outline
-    name: "Conductivity"
+    name: "Conductivité"
     id: ec_ezo
     address: ${addEC}
     unit_of_measurement: "mS/cm"
@@ -171,7 +171,7 @@ sensor:
 
   # Salinity
   - platform: template
-    name: Salinity
+    name: Salinité
     id: sensor_salinity
     icon: mdi:shaker-outline
     unit_of_measurement: "ppt"
@@ -232,7 +232,7 @@ sensor:
 text_sensor:
   # Conductivity Raw Value
   - platform: template
-    name: EC - Raw Value
+    name: EC - Valeur brute
     id: raw_value_ec
     icon: mdi:counter
     # disabled_by_default: true
@@ -248,7 +248,7 @@ text_sensor:
 
   # Selected Command Result - Conductivity
   - platform: template
-    name: EC - Command Result
+    name: EC - Valeur Cmd
     icon: mdi:data-matrix
     id: result_ec
     # disabled_by_default: true
@@ -258,7 +258,7 @@ text_sensor:
 button:
   # Read Conductivity Probe
   - platform: template
-    name: EC - Read
+    name: EC - Lire
     icon: mdi:read
     id: read_ec
     entity_category: "Config"
@@ -386,7 +386,7 @@ select:
       - "Selct sonde K1"
       - "Sortie Val Toutes (default)"
       - "Unité - Conductivité"
-      - "Unité - Salinity"
+      - "Unité - Salinité"
       - "Unité - Specific Gravity"
       - "Unité - TDS"
       - "Vérif Calibration"

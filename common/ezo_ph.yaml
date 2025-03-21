@@ -90,7 +90,7 @@ sensor:
 
 text_sensor:
   - platform: template  # Résultat des commandes envoyées à la sonde pH
-    name: pH - Cmd Résultat
+    name: pH - Valeur Cmd
     icon: mdi:data-matrix
     id: result_ph
     web_server:

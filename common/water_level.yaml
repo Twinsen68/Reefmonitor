@@ -56,7 +56,7 @@ binary_sensor:
 text_sensor:
   - platform: template  # Indique le niveau actuel de l'eau (High, Normal, Low)
     icon: mdi:waves-arrow-up
-    name: "Water Level"
+    name: "Niveau d'eau"
     id: water_level
     update_interval: "${update_water}"
     lambda: |-

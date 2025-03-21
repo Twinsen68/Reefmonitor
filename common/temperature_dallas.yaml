@@ -13,7 +13,7 @@ substitutions:
 web_server:
   sorting_groups:
     - id: sorting_group_temperature  # Groupe des capteurs de température
-      name: "Temperature"  # Nom affiché du groupe température
+      name: "Température"  # Nom affiché du groupe température
       sorting_weight: ${sorting_group_temperature_weight}
 
 one_wire:
@@ -24,7 +24,7 @@ sensor:
   - platform: dallas_temp  # Capteur de température Dallas DS18B20
     id: temp_1
     icon: mdi:thermometer-water
-    name: "Temperature"
+    name: "Température"
     state_class: "measurement"
     device_class: "temperature"
     update_interval: "${update_temp}"
@@ -43,7 +43,7 @@ sensor:
 
 binary_sensor:
   - platform: template  # Indique si la température est dans la plage idéale
-    name: Ideal Temperature
+    name: Température correct
     id: ideal_temp
     icon: mdi:thermometer-check
     lambda: |-
@@ -53,7 +53,7 @@ binary_sensor:
 
 text_sensor:
   - platform: template  # Indique la plage actuelle de température (Cool, OK, Warm)
-    name: Temperature Range
+    name: Gamme Température
     id: temp_range
     icon: mdi:thermometer-alert
     update_interval: "${update_temp}"
@@ -73,7 +73,7 @@ text_sensor:
 
 number:
   - platform: template  # Réglage du seuil inférieur de température (Cool)
-    name: "Temp. Cool"
+    name: "Temp. basse"
     id: plage_correct
     icon: mdi:thermometer-low
     optimistic: true
@@ -92,7 +92,7 @@ number:
       sorting_group_id: sorting_group_temperature
 
   - platform: template  # Réglage du seuil supérieur de température (Warm)
-    name: "Temp. Warm"
+    name: "Temp. haute"
     icon: mdi:thermometer-high
     id: plage_chaude
     optimistic: true
