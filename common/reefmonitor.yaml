@@ -1,37 +1,34 @@
 substitutions:
-  # names
-  name: "Reefmonitor"
-  friendly_name: "Reefmonitor"
-  comment: "Reefmonitor ESP32 - Aquarium Controller & Monitor"
-  project_name: "Twinsen68.Reefmonitor"
-  sorting_group_name: "Reefmonitor "
-  import: "false"
+  name: "Reefmonitor"  # Nom technique de l'appareil
+  friendly_name: "Reefmonitor"  # Nom convivial affiché dans l'interface utilisateur
+  comment: "Reefmonitor ESP32 - Aquarium Controller & Monitor"  # Description précise de l'appareil
+  project_name: "Twinsen68.Reefmonitor"  # Nom du projet pour identification ESPHome
+  sorting_group_name: "Reefmonitor "  # Préfixe du groupe dans l'interface web
+  import: "false"  # Activation/désactivation de l'importation complète de la configuration
 
 dashboard_import:
-  package_import_url: github://Twinsen68/Reefmonitor/Reefmonitor_config.yaml@main
-  import_full_config: "${import}"
-      
+  package_import_url: github://Twinsen68/Reefmonitor/Reefmonitor_config.yaml@main  # URL du fichier à importer depuis GitHub
+  import_full_config: "${import}"  # Option pour importer toute la configuration ou partiellement
+
 text_sensor: 
-  # Reefmonitor Version
-  - platform: template
+  - platform: template  # Capteur texte indiquant la version actuelle de Reefmonitor
     name: "Reefmonitor Version"
     id: Reefmonitor_version
     icon: mdi:update
-    update_interval: '365days'
+    update_interval: '365days'  # Intervalle de mise à jour très long (une fois par an)
     lambda: |-
       return {"${app_version}"};
     entity_category: "diagnostic"
     web_server:
-      sorting_group_id: sorting_group_diagnostic
+      sorting_group_id: sorting_group_diagnostic  # Assignation au groupe Diagnostic dans l'interface web
 
-  # GitHub Project URL
-  - platform: template
+  - platform: template  # Capteur texte indiquant l'URL du projet GitHub
     name: GitHub
     id: github
     icon: mdi:github
-    update_interval: '365days'
+    update_interval: '365days'  # Intervalle de mise à jour très long (une fois par an)
     lambda: |-
       return {"github.com/Twinsen68/Reefmonitor"};
     entity_category: "diagnostic"
     web_server:
-      sorting_group_id: sorting_group_diagnostic
+      sorting_group_id: sorting_group_diagnostic  # Assignation au groupe Diagnostic dans l'interface web

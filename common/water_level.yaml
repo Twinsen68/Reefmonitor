@@ -1,31 +1,25 @@
-substitutions:  
-  # Optical_1
-  opticalLowPin: "33" # yellow
-  opticalHighPin: "32" # blue
-
-  # Water Level
-  update_water: "60s"
-
-  sorting_group_water_level_weight: '11'
+substitutions:
+  opticalLowPin: "33"  # Broche du capteur optique inférieur (niveau bas)
+  opticalHighPin: "32"  # Broche du capteur optique supérieur (niveau haut)
+  update_water: "60s"  # Intervalle de mise à jour du capteur de niveau d'eau
+  sorting_group_water_level_weight: '11'  # Poids de tri pour le groupe niveau d'eau dans l'interface web
 
 web_server:
   sorting_groups:
-    - id: sorting_group_water_level
-      name: "Water Level"
+    - id: sorting_group_water_level  # Groupe des capteurs de niveau d'eau
+      name: "Water Level"  # Nom affiché du groupe
       sorting_weight: ${sorting_group_water_level_weight}
 
 esphome:
-  on_boot: 
-      priority: 200
-      then:
-        - component.update: water_level
+  on_boot:  # Action à exécuter au démarrage de l'appareil
+    priority: 200
+    then:
+      - component.update: water_level
 
 binary_sensor:
-  # Optical Sensor - LOW (yellow)
-  - platform: gpio
+  - platform: gpio  # Capteur optique pour détecter le niveau bas de l'eau
     id: os_low
     icon: mdi:arrow-down-bold
-    # disabled_by_default: true
     pin: 
       number: ${opticalLowPin}
       inverted: true
@@ -37,15 +31,13 @@ binary_sensor:
       - delayed_on_off: 30ms
     on_state:
       then:
-        component.update: water_level
+        - component.update: water_level
     web_server:
       sorting_group_id: sorting_group_water_level
 
-  # Optical Sensor - HIGH (blue)
-  - platform: gpio
+  - platform: gpio  # Capteur optique pour détecter le niveau haut de l'eau
     id: os_high
     icon: mdi:arrow-up-bold
-    # disabled_by_default: true
     pin: 
       number: ${opticalHighPin}
       inverted: true
@@ -57,31 +49,25 @@ binary_sensor:
       - delayed_on_off: 30ms
     on_state:
       then:
-        component.update: water_level
+        - component.update: water_level
     web_server:
       sorting_group_id: sorting_group_water_level
 
 text_sensor:
-  # Water Level
-  - platform: template
+  - platform: template  # Indique le niveau actuel de l'eau (High, Normal, Low)
     icon: mdi:waves-arrow-up
     name: "Water Level"
     id: water_level
     update_interval: "${update_water}"
     lambda: |-
-      if(id(os_high).state == true && id(os_low).state == true) {
-        // Water Level is High
+      if(id(os_high).state && id(os_low).state) {
         return {"High"};
-      }
-      if(id(os_high).state == false && id(os_low).state == false) {
-        // Water Level is Low
+      } else if(!id(os_high).state && !id(os_low).state) {
         return {"Low"};
-      }
-      if(id(os_high).state == false && id(os_low).state == true) {
-        // Water Level is Normal
+      } else if(!id(os_high).state && id(os_low).state) {
         return {"Normal"};
       } else {
-        return {"Uknown or Error"};
+        return {"Unknown or Error"};
       }
     web_server:
       sorting_group_id: sorting_group_water_level

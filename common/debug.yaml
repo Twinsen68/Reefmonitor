@@ -1,37 +1,40 @@
 substitutions:
-  sorting_group_debug: '96'
+  sorting_group_debug: '96'  # Poids pour trier le groupe Debug dans l'interface web
 
 web_server:
   sorting_groups:
-    - id: sorting_group_debug
-      name: "Debug"
-      sorting_weight: ${sorting_group_debug}
+    - id: sorting_group_debug  # Identifiant unique du groupe de tri pour les infos de debug
+      name: "Debug"  # Nom affiché du groupe de debug dans l'interface web
+      sorting_weight: ${sorting_group_debug}  # Priorité d'affichage définie plus haut
       
 debug:
-  update_interval: 5s
+  update_interval: 5s  # Intervalle de mise à jour des données de debug toutes les 5 secondes
 
 sensor:
-  - platform: debug
+  - platform: debug  # Utilisation de la plateforme ESPHome "debug" pour capturer les métriques internes
     free:
-      name: "Heap Free"
+      name: "Heap Free"  # Mémoire libre disponible sur le heap
       web_server:
-        sorting_group_id: sorting_group_debug
+        sorting_group_id: sorting_group_debug  # Assignation au groupe Debug
+
     block:
-      name: "Heap Max Block"
+      name: "Heap Max Block"  # Taille du plus grand bloc de mémoire disponible
       web_server:
-        sorting_group_id: sorting_group_debug
+        sorting_group_id: sorting_group_debug  # Assignation au groupe Debug
+
     loop_time:
-      name: "Loop Time"
+      name: "Loop Time"  # Temps d'exécution moyen d'une boucle ESPHome
       web_server:
-        sorting_group_id: sorting_group_debug
+        sorting_group_id: sorting_group_debug  # Assignation au groupe Debug
 
 text_sensor:
-  - platform: debug
+  - platform: debug  # Plateforme ESPHome "debug" pour récupérer les informations texte internes
     device:
-      name: "Device Info"
+      name: "Device Info"  # Informations générales sur l'appareil (modèle, version du framework, etc.)
       web_server:
-        sorting_group_id: sorting_group_debug
+        sorting_group_id: sorting_group_debug  # Assignation au groupe Debug
+
     reset_reason:
-      name: "Reset Reason"
+      name: "Reset Reason"  # Dernière raison pour laquelle l'appareil a redémarré
       web_server:
-        sorting_group_id: sorting_group_debug
+        sorting_group_id: sorting_group_debug  # Assignation au groupe Debug

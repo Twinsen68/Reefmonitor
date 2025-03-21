@@ -1,93 +1,87 @@
 substitutions:
-  # names
-  name: "esp32"
-  friendly_name: "ESP32"
-  comment: "Firmware for ESP32"
-  project_name: "esphome.esp32"
-  
-  # App Version
-  app_version: "1.0"  
-  # Logger Level - Can use VERBOSE for more information in Logs
-  logger: "DEBUG"
+  name: "esp32"  # Nom technique de l'appareil
+  friendly_name: "ESP32"  # Nom convivial affiché dans l'interface utilisateur
+  comment: "Firmware for ESP32"  # Commentaire décrivant l'appareil
+  project_name: "esphome.esp32"  # Nom du projet pour identification ESPHome
+  app_version: "1.0"  # Version de l'application pour suivi des mises à jour
+  logger: "DEBUG"  # Niveau de journalisation (DEBUG, INFO, etc.)
 
-  # I2C pins
-  sdaPin: "21" # yellow/TX PMP -> green
-  sclPin: "22" # blue/RX PMP -> white
+  # Définition des broches I2C
+  sdaPin: "21"  # Broche SDA (données) du bus I2C
+  sclPin: "22"  # Broche SCL (horloge) du bus I2C
 
-  sorting_group_name: ""
-  sorting_group_misc_weight: '97'
-  sorting_group_diagnostic_weight: '98'
-  sorting_group_config_weight: '99'
+  sorting_group_name: ""  # Préfixe optionnel pour les groupes de tri
+  sorting_group_misc_weight: '97'  # Poids de tri du groupe "Misc. Sensors"
+  sorting_group_diagnostic_weight: '98'  # Poids de tri du groupe "Diagnostic"
+  sorting_group_config_weight: '99'  # Poids de tri du groupe "Configuration"
 
 esp32:
-  board: esp32dev
+  board: esp32dev  # Carte ESP32 de développement générique
   framework:
-    type: arduino
+    type: arduino  # Framework utilisé pour la compilation (Arduino)
 
 esphome:
-  min_version: 2024.6.0
-  name: "${name}"
-  friendly_name: "${friendly_name}"
-  # Automatically add the mac address to the name
-  name_add_mac_suffix: true
-  comment: "${comment}"
+  min_version: 2024.6.0  # Version minimale requise d'ESPHome
+  name: "${name}"  # Utilisation de la substitution du nom technique
+  friendly_name: "${friendly_name}"  # Utilisation de la substitution du nom convivial
+  name_add_mac_suffix: true  # Ajoute automatiquement l'adresse MAC au nom
+  comment: "${comment}"  # Commentaire utilisé depuis les substitutions
   project:
-    name: "${project_name}"
-    version: "${app_version}"
+    name: "${project_name}"  # Nom du projet ESPHome
+    version: "${app_version}"  # Version du projet ESPHome
 
-# Enable logging
 logger:
-  level: "${logger}"
+  level: "${logger}"  # Niveau de détail des journaux selon la substitution
 
-# i2c Pins
+# Configuration du bus I2C avec détection automatique des périphériques
 i2c:
-  sda: ${sdaPin}
-  scl: ${sclPin}
-  scan: true
-  id: bus_a
+  sda: ${sdaPin}  # Attribution broche SDA depuis substitution
+  scl: ${sclPin}  # Attribution broche SCL depuis substitution
+  scan: true  # Active la détection automatique des périphériques
+  id: bus_a  # Identifiant unique pour le bus I2C
 
 wifi: 
-  ap:
+  ap:  # Point d'accès activé pour configuration initiale ou dépannage
 
 ota:
-  - platform: esphome
+  - platform: esphome  # Activation des mises à jour OTA via ESPHome
 
-captive_portal:
+captive_portal:  # Portail captif activé pour récupération en cas de perte de réseau
 
 web_server:
-  version: 3
+  version: 3  # Version du serveur web ESPHome
   sorting_groups:
-    - id: sorting_group_diagnostic
-      name: "${sorting_group_name}Diagnostic"
-      sorting_weight: ${sorting_group_diagnostic_weight}
-    - id: sorting_group_config
-      name: "Reefmonitor Configuration"
-      sorting_weight: ${sorting_group_config_weight}
-    - id: sorting_group_misc
-      name: "Misc. Sensors"
-      sorting_weight: ${sorting_group_misc_weight}
-  
-improv_serial:
+    - id: sorting_group_diagnostic  # Groupe pour les informations de diagnostic
+      name: "${sorting_group_name}Diagnostic"  # Nom complet du groupe
+      sorting_weight: ${sorting_group_diagnostic_weight}  # Poids de tri
+    - id: sorting_group_config  # Groupe pour les configurations
+      name: "Reefmonitor Configuration"  # Nom complet du groupe
+      sorting_weight: ${sorting_group_config_weight}  # Poids de tri
+    - id: sorting_group_misc  # Groupe pour les capteurs divers
+      name: "Misc. Sensors"  # Nom complet du groupe
+      sorting_weight: ${sorting_group_misc_weight}  # Poids de tri
 
-# Internal Blue LED
+improv_serial:  # Active le protocole "Improv Serial" pour configuration simplifiée
+
+# LED bleue interne utilisée comme indicateur de statut
 light:
   - platform: status_led
     id: internal_led
     pin:
-      number: GPIO2
-      ignore_strapping_warning: true
+      number: GPIO2  # Broche de la LED interne
+      ignore_strapping_warning: true  # Ignore les avertissements spécifiques au GPIO2
 
 sensor:
-  # Internal Temp.
+  # Capteur interne de température
   - platform: internal_temperature
-    name: "Internal Temperature"
+    name: "Temperature interne"
     icon: mdi:thermometer
     web_server:
       sorting_group_id: sorting_group_diagnostic
 
-  # Wifi Signal 
-  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
-    name: "WiFi Signal dB"
+  # Force du signal WiFi en dB
+  - platform: wifi_signal
+    name: "Signal WiFi  dB"
     disabled_by_default: true
     icon: mdi:wifi
     id: wifi_signal_db
@@ -96,10 +90,10 @@ sensor:
     web_server:
       sorting_group_id: sorting_group_diagnostic
 
-  # Wifi %
-  - platform: copy # Reports the WiFi signal strength in %
+  # Conversion de la force du signal WiFi en pourcentage
+  - platform: copy
     source_id: wifi_signal_db
-    name: "WiFi Signal Strength"
+    name: "Force du signal wifi"
     icon: mdi:wifi
     filters:
       - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
@@ -109,111 +103,33 @@ sensor:
     web_server:
       sorting_group_id: sorting_group_diagnostic
 
-  # Uptime sensor
+  # Capteur d'uptime de l'appareil
   - platform: uptime
     name: Uptime 
     web_server:
       sorting_group_id: sorting_group_diagnostic
 
-  # Internal Magnetic Sensor
+  # Capteur interne à effet Hall de l'ESP32
   - platform: esp32_hall
     name: "ESP32 Hall Sensor"
     entity_category: "diagnostic"
     web_server:
       sorting_group_id: sorting_group_diagnostic
 
-  # of I2C devices connected
+  # Nombre de périphériques connectés sur le bus I2C
   - platform: template
     name: "I2C Devices Connected"
     id: i2c_devices
     icon: mdi:integrated-circuit-chip
     entity_category: "diagnostic"
-    # disabled_by_default: true
     lambda: |-
       byte error, address;
-      int nDevices;
-      nDevices = 0;
+      int nDevices = 0;
       for(address = 1; address < 127; address++) {
         Wire.beginTransmission(address);
         error = Wire.endTransmission();
-        if (error == 0) {
-          nDevices++;
-        }
+        if (error == 0) nDevices++;
       }
       return nDevices;
     web_server:
       sorting_group_id: sorting_group_diagnostic
-
-binary_sensor:
-  # API Status
-  - platform: status
-    name: "Status"
-    icon: mdi:check-circle
-    web_server:
-      sorting_group_id: sorting_group_diagnostic
-
-text_sensor:
-  # Hostname
-  - platform: template
-    name: "Hostname"
-    id: hostname
-    icon: mdi:cellphone-arrow-down
-    lambda: |-
-      return {"${name}"};
-    entity_category: "diagnostic"
-    web_server:
-      sorting_group_id: sorting_group_diagnostic
-
-  # Wifi Info
-  - platform: wifi_info
-    ip_address:
-      name: IP Address
-      icon: mdi:ip-network
-      web_server:
-        sorting_group_id: sorting_group_diagnostic
-    ssid:
-      name: Connected SSID
-      icon: mdi:wifi-arrow-left-right
-      web_server:
-        sorting_group_id: sorting_group_diagnostic
-    bssid:
-      name: Connected BSSID
-      icon: mdi:wifi-star
-      disabled_by_default: true
-      web_server:
-        sorting_group_id: sorting_group_diagnostic
-    mac_address:
-      name: Mac Address
-      icon: mdi:chip
-      web_server:
-        sorting_group_id: sorting_group_diagnostic
-
-button:
-  # Soft Restart
-  - platform: restart
-    id: restart_button
-    name: "Restart"
-    web_server:
-      sorting_group_id: sorting_group_config
-
-  # Factory Reset
-  - platform: factory_reset
-    name: Factory Reset (USE WITH CAUTION)
-    disabled_by_default: true
-    web_server:
-      sorting_group_id: sorting_group_config
-
-  # Safe Mode Restart
-  - platform: safe_mode
-    name: "Restart in Safe Mode"
-    id: restart_safe
-    web_server:
-      sorting_group_id: sorting_group_config
-
-  # Shutdown
-  - platform: shutdown
-    name: "Shutdown"
-    disabled_by_default: true
-    id: shutdown_button
-    web_server:
-      sorting_group_id: sorting_group_config
