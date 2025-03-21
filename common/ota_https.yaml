@@ -9,7 +9,7 @@ http_request:
 
 update:
   - platform: http_request
-    name: AquaPi Firmware Update
+    name: Firmware Update
     id: update_firmware_sensor
     entity_category: 'diagnostic'
     update_interval: ${ota_update_interval}
@@ -21,7 +21,7 @@ update:
 button:
   - platform: template
     id: update_firmware
-    name: Update AquaPi Firmware - Stable
+    name: Update reefmonitor Firmware - Stable
     entity_category: "config"
     icon: mdi:update
     disabled_by_default: true
