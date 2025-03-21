@@ -1,9 +1,9 @@
 substitutions:
   name: "reefmonitor"  # Nom technique de l'appareil
-  friendly_name: "Reefmonitor"  # Nom convivial affiché dans l'interface utilisateur
+  friendly_name: "reefmonitor"  # Nom convivial affiché dans l'interface utilisateur
   comment: "Reefmonitor ESP32 - Aquarium Controller & Monitor"  # Description précise de l'appareil
   project_name: "Twinsen68.Reefmonitor"  # Nom du projet pour identification ESPHome
-  sorting_group_name: "Reefmonitor "  # Préfixe du groupe dans l'interface web
+  sorting_group_name: "reefmonitor "  # Préfixe du groupe dans l'interface web
   import: "false"  # Activation/désactivation de l'importation complète de la configuration
 
 dashboard_import:
@@ -12,7 +12,7 @@ dashboard_import:
 
 text_sensor: 
   - platform: template  # Capteur texte indiquant la version actuelle de Reefmonitor
-    name: "Reefmonitor Version"
+    name: "reefmonitor Version"
     id: reefmonitor_version
     icon: mdi:update
     update_interval: '365days'  # Intervalle de mise à jour très long (une fois par an)
