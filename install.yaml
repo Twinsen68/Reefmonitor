@@ -12,7 +12,7 @@ packages:  # Permet d'inclure une configuration externe pour modularité et réu
   twinsen68.reefmonitor:  # Nom interne du package inclus.
     url: https://github.com/twinsen68/reefmonitor  # Dépôt GitHub où se trouve la configuration.
     file: reefmonitor_config.yaml  # Fichier de configuration spécifique à inclure.
-
+    ref: v1.0.0
 esphome:  # Paramètres globaux pour ESPHome.
   name: ${name}  # Nom de l'appareil, utilisant la substitution déclarée plus haut.
   name_add_mac_suffix: false  # Si true, ajoute un suffixe basé sur l'adresse MAC pour éviter les doublons.
