@@ -152,9 +152,6 @@ select:
           format: "Chosen option: %s"
           args: ["x.c_str()"]
     web_server:
-<<<<<<< Updated upstream
-      sorting_group_id: sorting_group_orp
-=======
       sorting_group_id: sorting_group_orp
 
 number:
@@ -170,4 +167,3 @@ number:
     entity_category: "Config"
     web_server:
       sorting_group_id: sorting_group_orp  # Groupe visuel dans l'interface web
->>>>>>> Stashed changes
