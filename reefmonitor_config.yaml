@@ -13,3 +13,4 @@ packages:  # Inclut des fichiers YAML externes pour modularité et réutilisatio
   temperature_dallas: !include common/temperature_dallas.yaml  # Référence répétée pour assurer la modularité.
   #ota_https: !include common/ota_https.yaml  # Active les mises à jour OTA (Over-The-Air) sécurisées via HTTPS.
   debug: !include common/debug.yaml  # Inclut une configuration pour le débogage (logs détaillés, etc.).
+  patch_orp_debug: !include common/ezo_orp_debug.yaml  # PATCH TEMPORAIRE – permet de changer l’adresse I2C ORP
