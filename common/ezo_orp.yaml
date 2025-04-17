@@ -116,6 +116,20 @@ button:
             // }
     web_server:
       sorting_group_id: sorting_group_orp
+  - platform: template
+    name: "Appliquer nouvelle adresse ORP"  # Bouton pour appliquer le changement
+    icon: mdi:network-outline
+    id: orp_change_address_button
+    on_press:
+      then:
+        - lambda: |-
+            int addr = (int) id(new_orp_address).state;
+            id(orp_ezo).send_custom("I2C," + to_string(addr));  // Envoie la commande de changement d'adresse
+        - logger.log:
+            format: "Changement d'adresse ORP demandé vers: %d"
+            args: ["(int) id(new_orp_address).state"]
+    web_server:
+      sorting_group_id: sorting_group_orp  # Groupe visuel dans l'interface web
 
 select:
   - platform: template
@@ -138,4 +152,22 @@ select:
           format: "Chosen option: %s"
           args: ["x.c_str()"]
     web_server:
+<<<<<<< Updated upstream
       sorting_group_id: sorting_group_orp
+=======
+      sorting_group_id: sorting_group_orp
+
+number:
+  - platform: template
+    name: "Changer adresse ORP"  # Champ pour saisir une nouvelle adresse I2C
+    id: new_orp_address
+    min_value: 1
+    max_value: 127
+    step: 1
+    initial_value: 98  # Adresse actuelle par défaut (0x62)
+    mode: box
+    optimistic: true
+    entity_category: "Config"
+    web_server:
+      sorting_group_id: sorting_group_orp  # Groupe visuel dans l'interface web
+>>>>>>> Stashed changes
