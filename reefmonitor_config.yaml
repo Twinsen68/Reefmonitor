@@ -8,6 +8,7 @@ packages:  # Inclut des fichiers YAML externes pour modularité et réutilisatio
   water_level: !include common/water_level.yaml  # Gestion des capteurs optiques (par exemple, pour mesurer le niveau d'eau).
   ezo_ph: !include common/ezo_ph.yaml  # Intègre les sondes pH EZO pour surveiller l'acidité de l'eau.
   ezo_ec: !include common/ezo_ec.yaml  # Intègre les sondes EZO pour la conductivité électrique (EC).
+  # === TEST BRANCHE ORP-TEST ACTIVÉE ===
   ezo_orp: !include common/ezo_orp.yaml  # Intègre les sondes EZO pour le potentiel rédox (ORP).
   substitutions: !include common/substitutions.yaml  # Centralise les variables réutilisées entre les fichiers.
   temperature_dallas: !include common/temperature_dallas.yaml  # Référence répétée pour assurer la modularité.
