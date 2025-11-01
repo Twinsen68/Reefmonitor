@@ -145,6 +145,57 @@ Une fois ces éléments prêts, passez à l’étape suivante : **Installation d
 2. Ouvrez un terminal et exécutez la commande suivante pour compiler et flasher le firmware initial :
    ```bash
    esphome run install.yaml
+   ```
+
+### **Procédure de flash depuis le terminal macOS**
+
+Pour les projets volumineux ou lorsque l’interface graphique de Home Assistant n’est pas adaptée, vous pouvez flasher l’ESP32 directement depuis un Mac. Voici une procédure complète :
+
+1. **Installer Python 3 et ESPHome**
+   - macOS inclut Python, mais il est recommandé d’installer une version à jour :
+     ```bash
+     brew install python@3
+     ```
+   - Installez ensuite ESPHome via `pipx` (recommandé) ou `pip` :
+     ```bash
+     python3 -m pip install --user pipx
+     python3 -m pipx install esphome
+     ```
+     > 💡 Vous pouvez utiliser `pip install --user esphome` si `pipx` n’est pas disponible.
+
+2. **Connecter l’ESP32 au Mac**
+   - Branchez l’ESP32 via un câble USB.
+   - Identifiez le port série attribué :
+     ```bash
+     ls /dev/cu.*
+     ```
+     Les ports des ESP32 apparaissent généralement sous la forme `/dev/cu.SLAB_USBtoUART` ou `/dev/cu.usbserial-xxxx`.
+
+3. **(Optionnel) Donner les droits d’accès au port**
+   - Si une erreur de permission survient, ajustez les droits :
+     ```bash
+     sudo chmod a+rw /dev/cu.SLAB_USBtoUART
+     ```
+
+4. **Compiler et flasher le firmware**
+   - Placez-vous dans le dossier contenant `install.yaml` (ou le fichier YAML de votre nœud).
+   - Lancez la commande en précisant le port série :
+     ```bash
+     esphome run install.yaml --device /dev/cu.SLAB_USBtoUART
+     ```
+     - La compilation peut prendre plusieurs minutes selon la taille du projet.
+     - Lors de l’étape de flash, maintenez éventuellement le bouton **BOOT** de l’ESP32 si la connexion échoue au premier essai.
+
+5. **Vérifier le flash et passer aux mises à jour OTA**
+   - Une fois le flash terminé, l’ESP32 redémarre et se connecte au Wi-Fi configuré.
+   - Vous pouvez ensuite effectuer toutes les mises à jour suivantes via **OTA**, soit depuis Home Assistant, soit avec :
+     ```bash
+     esphome run install.yaml --device OTA
+     ```
+   - Pour effacer complètement la mémoire flash avant un nouveau déploiement, utilisez :
+     ```bash
+     esptool.py --port /dev/cu.SLAB_USBtoUART erase_flash
+     ```
 
 ### **Étape 3 : Configuration Wi-Fi**
 ### **Étape 3 : Configuration Wi-Fi**
