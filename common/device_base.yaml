@@ -109,13 +109,6 @@ sensor:
     web_server:
       sorting_group_id: sorting_group_diagnostic
 
-  # Capteur interne à effet Hall de l'ESP32
-  - platform: esp32_hall
-    name: "ESP32 Hall Sensor"
-    entity_category: "diagnostic"
-    web_server:
-      sorting_group_id: sorting_group_diagnostic
-
   # Nombre de périphériques connectés sur le bus I2C
   - platform: template
     name: "I2C Devices Connected"
