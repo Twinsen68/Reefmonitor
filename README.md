@@ -177,7 +177,15 @@ Pour les projets volumineux ou lorsque l’interface graphique de Home Assistant
      sudo chmod a+rw /dev/cu.SLAB_USBtoUART
      ```
 
-4. **Compiler et flasher le firmware**
+4. **Se placer dans le dossier du projet**
+   - Clonez le dépôt puis entrez dans le dossier :
+     ```bash
+     git clone https://github.com/twinsen68/reefmonitor.git
+     cd reefmonitor
+     ```
+   - Assurez-vous que le fichier `install.yaml` est bien présent dans ce dossier.
+
+5. **Compiler et flasher le firmware**
    - Placez-vous dans le dossier contenant `install.yaml` (ou le fichier YAML de votre nœud).
    - Lancez la commande en précisant le port série :
      ```bash
@@ -186,7 +194,7 @@ Pour les projets volumineux ou lorsque l’interface graphique de Home Assistant
      - La compilation peut prendre plusieurs minutes selon la taille du projet.
      - Lors de l’étape de flash, maintenez éventuellement le bouton **BOOT** de l’ESP32 si la connexion échoue au premier essai.
 
-5. **Vérifier le flash et passer aux mises à jour OTA**
+6. **Vérifier le flash et passer aux mises à jour OTA**
    - Une fois le flash terminé, l’ESP32 redémarre et se connecte au Wi-Fi configuré.
    - Vous pouvez ensuite effectuer toutes les mises à jour suivantes via **OTA**, soit depuis Home Assistant, soit avec :
      ```bash
