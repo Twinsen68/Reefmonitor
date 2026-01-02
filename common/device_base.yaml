@@ -26,6 +26,8 @@ esphome:
   friendly_name: "${friendly_name}"  # Utilisation de la substitution du nom convivial
   name_add_mac_suffix: true  # Ajoute automatiquement l'adresse MAC au nom
   comment: "${comment}"  # Commentaire utilisé depuis les substitutions
+  includes:
+    - common/wire_compat.h
   project:
     name: "${project_name}"  # Nom du projet ESPHome
     version: "${app_version}"  # Version du projet ESPHome
