@@ -2,6 +2,10 @@ substitutions:
   # App Version
   app_version: "1.3.1"
 
+esphome:
+  includes:
+    - common/wire_compat.h
+
 packages:  # Inclut des fichiers YAML externes pour modularité et réutilisation.
   device_base: !include common/device_base.yaml  # Contient les configurations de base du périphérique.
   reefmonitor: !include common/reefmonitor.yaml  # Fichier spécifique au projet reefmonitor.
