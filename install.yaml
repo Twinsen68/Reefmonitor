@@ -17,6 +17,8 @@ esphome:  # Paramètres globaux pour ESPHome.
   name: ${name}  # Nom de l'appareil, utilisant la substitution déclarée plus haut.
   name_add_mac_suffix: false  # Si true, ajoute un suffixe basé sur l'adresse MAC pour éviter les doublons.
   friendly_name: ${friendly_name}  # Nom convivial, également basé sur la substitution.
+  includes:
+    - common/wire_compat.h
 
 api:  # Configuration de l'API ESPHome pour la communication avec Home Assistant.
   encryption:
