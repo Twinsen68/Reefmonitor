@@ -1,0 +1,137 @@
+substitutions:
+  addRTD: "102"  # Adresse I2C du circuit RTD (température)
+  update_rtd: "60s"  # Intervalle de mise à jour des valeurs de température
+  sorting_group_rtd: '34'  # Poids pour trier le groupe RTD dans l'interface web
+
+web_server:
+  sorting_groups:
+    - id: sorting_group_rtd  # Groupe des capteurs RTD
+      name: "Température - EZO RTD"  # Nom affiché du groupe RTD
+      sorting_weight: ${sorting_group_rtd}  # Poids de tri du groupe RTD
+
+api:
+  actions:
+    - action: rtd_change_address  # Changer l'adresse I2C du capteur RTD
+      variables:
+        address: int
+      then:
+        - lambda: |-
+            id(rtd_ezo).send_custom("I2C,{{address}}");
+    - action: rtd_custom_command  # Envoi d'une commande personnalisée au capteur RTD
+      variables:
+        command: string
+      then:
+        - lambda: |-
+            id(rtd_ezo).send_custom({{command}});
+    - action: rtd_read_continous  # Lecture continue de la sonde RTD pendant 60 secondes
+      then:
+        - repeat:
+            count: 60
+            then:
+              - button.press: read_rtd
+              - delay: 1s
+
+esphome:
+  on_boot:  # Actions exécutées au démarrage
+    priority: 800
+    then:
+      - button.press: send_selected_rtd
+
+sensor:
+  - platform: ezo  # Capteur RTD EZO
+    icon: mdi:thermometer
+    name: "Température RTD"
+    id: rtd_ezo
+    address: ${addRTD}
+    unit_of_measurement: "°C"
+    accuracy_decimals: 2
+    update_interval: "${update_rtd}"
+    state_class: "measurement"
+    device_class: "temperature"
+    web_server:
+      sorting_group_id: sorting_group_rtd
+      sorting_weight: 10
+
+text_sensor:
+  - platform: template  # Résultat des commandes envoyées à la sonde RTD
+    name: RTD - Valeur Cmd
+    icon: mdi:data-matrix
+    id: result_rtd
+    web_server:
+      sorting_group_id: sorting_group_rtd
+
+button:
+  - platform: template  # Bouton pour déclencher la lecture du capteur RTD
+    name: RTD - Lire
+    id: read_rtd
+    icon: mdi:read
+    entity_category: "Config"
+    on_press:
+      then:
+        - lambda: |-
+            byte error;
+            Wire.beginTransmission(${addRTD});
+            error = Wire.endTransmission();
+            if (error == 0) {
+              id(rtd_ezo).send_custom("R");
+            } else {
+              ESP_LOGW("custom_rtd_read", "No RTD sensor detected at address: ${addRTD}!!");
+            }
+    web_server:
+      sorting_group_id: sorting_group_rtd
+
+  - platform: template
+    name: RTD - Envoi Cmd
+    id: send_selected_rtd
+    icon: mdi:apple-keyboard-command
+    entity_category: "Config"
+    on_press:
+      then:
+        - lambda: |-
+            const auto option = id(select_command_rtd).current_option();
+            if (option.has_value() && option.value() == "Lire") {
+              id(rtd_ezo).send_custom("R");
+            }
+            if (option.has_value() && option.value() == "Information") {
+              id(rtd_ezo).get_device_information();
+            }
+            if (option.has_value() && option.value() == "Status") {
+              id(rtd_ezo).send_custom("Status");
+            }
+            if (option.has_value() && option.value() == "Vérif calibration") {
+              id(rtd_ezo).get_calibration();
+            }
+            if (option.has_value() && option.value() == "Calibration @ 0°C ") {
+              id(rtd_ezo).send_custom("Cal,0");
+            }
+            if (option.has_value() && option.value() == "Calibration @ 100°C ") {
+              id(rtd_ezo).send_custom("Cal,100");
+            }
+            if (option.has_value() && option.value() == "Calibration CLEAR ") {
+              id(rtd_ezo).clear_calibration();
+            }
+    web_server:
+      sorting_group_id: sorting_group_rtd
+
+select:
+  - platform: template
+    name: RTD - Cmd selectionnée
+    id: select_command_rtd
+    icon: mdi:apple-keyboard-command
+    optimistic: true
+    entity_category: "Config"
+    options:
+      - "Lire"
+      - "Information"
+      - "Status"
+      - "Vérif calibration"
+      - "Calibration @ 0°C "
+      - "Calibration @ 100°C "
+      - "Calibration CLEAR "
+    initial_option: "Vérif calibration"
+    set_action:
+      - logger.log:
+          format: "Chosen option: %s"
+          args: ["x.c_str()"]
+    web_server:
+      sorting_group_id: sorting_group_rtd

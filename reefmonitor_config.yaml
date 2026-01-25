@@ -13,6 +13,7 @@ packages:  # Inclut des fichiers YAML externes pour modularité et réutilisatio
   ezo_ph: !include common/ezo_ph.yaml  # Intègre les sondes pH EZO pour surveiller l'acidité de l'eau.
   ezo_ec: !include common/ezo_ec.yaml  # Intègre les sondes EZO pour la conductivité électrique (EC).
   ezo_orp: !include common/ezo_orp.yaml  # Intègre les sondes EZO pour le potentiel rédox (ORP).
+  ezo_rtd: !include common/ezo_rtd.yaml  # Intègre la carte RTD EZO pour la température.
   substitutions: !include common/substitutions.yaml  # Centralise les variables réutilisées entre les fichiers.
   temperature_dallas: !include common/temperature_dallas.yaml  # Référence répétée pour assurer la modularité.
   #ota_https: !include common/ota_https.yaml  # Active les mises à jour OTA (Over-The-Air) sécurisées via HTTPS.
