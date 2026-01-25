@@ -296,6 +296,20 @@ Adresse : Modifiez l’adresse du capteur Dallas en fonction de votre matériel.
 Scannez les capteurs connectés via les logs ESPHome pour identifier leurs adresses.
 Intervalle : Ajustez update_interval (par défaut à 60s).
 
+#### **1.b Température RTD (Atlas Scientific EZO)**
+- **Rôle** : Mesure la température via la carte RTD EZO d’Atlas Scientific.
+- **Configuration YAML** : Le capteur est configuré dans le fichier `ezo_rtd.yaml` :
+  ```yaml
+  sensor:
+    - platform: ezo
+      name: "Température RTD"
+      address: 102
+      update_interval: 60s
+  ```
+- **Personnalisation** :
+Adresse I2C : Ajustez l’adresse si nécessaire (par défaut : 102).
+Interlink : si vous utilisez une carte Interlink, vous pouvez réserver son port 4 pour la sonde de température.
+
 #### **2. pH (Circuit EZO)**
 
 - **Rôle** : Surveille l’acidité de l’eau.
