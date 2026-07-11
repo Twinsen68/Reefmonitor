@@ -288,77 +288,77 @@ button:
     on_press:
       then:
         - lambda: |-
-            const auto option = id(select_command_ec).current_option();
-            if (option.has_value() && option.value() == "Lire") {
+            const char *option = id(select_command_ec).current_option();
+            if (strcmp(option, "Lire") == 0) {
               id(ec_ezo).send_custom("R");
             }
-            if (option.has_value() && option.value() == "Information") {
+            if (strcmp(option, "Information") == 0) {
               id(ec_ezo).get_device_information();
             }
-            if (option.has_value() && option.value() == "Status") {
+            if (strcmp(option, "Status") == 0) {
               id(ec_ezo).send_custom("Status");
             }
-            if (option.has_value() && option.value() == "Obt Val K") {
+            if (strcmp(option, "Obt Val K") == 0) {
               id(ec_ezo).send_custom("K,?");
             }  
-            if (option.has_value() && option.value() == "Obt val TDS") {
+            if (strcmp(option, "Obt val TDS") == 0) {
               id(ec_ezo).send_custom("TDS,?");
             }
-            if (option.has_value() && option.value() == "Conv en NaCl - 0.48") {
+            if (strcmp(option, "Conv en NaCl - 0.48") == 0) {
               id(ec_ezo).send_custom("TDS,0.48");
             }
-            if (option.has_value() && option.value() == "Obt parametre") {
+            if (strcmp(option, "Obt parametre") == 0) {
               id(ec_ezo).send_custom("O,?");
             }  
-            if (option.has_value() && option.value() == "Selct sonde K1") {
+            if (strcmp(option, "Selct sonde K1") == 0) {
               id(ec_ezo).send_custom("K,1");
             }
-            if (option.has_value() && option.value() == "Sortie Val Toutes (default)") {
+            if (strcmp(option, "Sortie Val Toutes (default)") == 0) {
               id(ec_ezo).send_custom("O,EC,1");
               id(ec_ezo).send_custom("O,TDS,1");
               id(ec_ezo).send_custom("O,S,1");
               id(ec_ezo).send_custom("O,SG,1");
             }
-            if (option.has_value() && option.value() == "Unité - Conductivité") {
+            if (strcmp(option, "Unité - Conductivité") == 0) {
               id(ec_ezo).send_custom("O,EC,1");
               id(ec_ezo).send_custom("O,TDS,0");
               id(ec_ezo).send_custom("O,S,0");
               id(ec_ezo).send_custom("O,SG,0");
             }
-            if (option.has_value() && option.value() == "Unité - Salinity") {
+            if (strcmp(option, "Unité - Salinity") == 0) {
               id(ec_ezo).send_custom("O,EC,0");
               id(ec_ezo).send_custom("O,TDS,0");
               id(ec_ezo).send_custom("O,S,1");
               id(ec_ezo).send_custom("O,SG,0");
             }
-            if (option.has_value() && option.value() == "Unité - Specific Gravity") {
+            if (strcmp(option, "Unité - Specific Gravity") == 0) {
               id(ec_ezo).send_custom("O,EC,0");
               id(ec_ezo).send_custom("O,TDS,0");
               id(ec_ezo).send_custom("O,S,0");
               id(ec_ezo).send_custom("O,SG,1");
             }
-            if (option.has_value() && option.value() == "Unité - TDS") {
+            if (strcmp(option, "Unité - TDS") == 0) {
               id(ec_ezo).send_custom("O,EC,0");
               id(ec_ezo).send_custom("O,TDS,1");
               id(ec_ezo).send_custom("O,S,0");
               id(ec_ezo).send_custom("O,SG,0");
             }
-            if (option.has_value() && option.value() == "Vérif Calibration") {
+            if (strcmp(option, "Vérif Calibration") == 0) {
               id(ec_ezo).get_calibration();
             }  
-            if (option.has_value() && option.value() == "Calibration @ SEC") {
+            if (strcmp(option, "Calibration @ SEC") == 0) {
               id(ec_ezo).send_custom("Cal,dry");
             }
-            if (option.has_value() && option.value() == "Calibration @ BASSE = 12880") {
+            if (strcmp(option, "Calibration @ BASSE = 12880") == 0) {
               id(ec_ezo).send_custom("Cal,low,12880");
             }
-            if (option.has_value() && option.value() == "Calibration @ HAUTE = 80000") {
+            if (strcmp(option, "Calibration @ HAUTE = 80000") == 0) {
               id(ec_ezo).send_custom("Cal,high,80000");
             }
-            if (option.has_value() && option.value() == "Calibration CLEAR") {
+            if (strcmp(option, "Calibration CLEAR") == 0) {
               id(ec_ezo).clear_calibration();
             }
-            if (option.has_value() && option.value() == "Réinitialisation") {
+            if (strcmp(option, "Réinitialisation") == 0) {
               id(ec_ezo).send_custom("Factory");
             }
             // else {

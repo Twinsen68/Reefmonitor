@@ -92,24 +92,24 @@ button:
     on_press:
       then:
         - lambda: |-
-            const auto option = id(select_command_orp).current_option();
-            if (option.has_value() && option.value() == "Lire") {
+            const char *option = id(select_command_orp).current_option();
+            if (strcmp(option, "Lire") == 0) {
               id(orp_ezo).send_custom("R");
             }
             // Get Device Firmware Version
-            if (option.has_value() && option.value() == "Information") {
+            if (strcmp(option, "Information") == 0) {
               id(orp_ezo).get_device_information();
             }
-            if (option.has_value() && option.value() == "Status") {
+            if (strcmp(option, "Status") == 0) {
               id(orp_ezo).send_custom("Status");
             }
-            if (option.has_value() && option.value() == "Vérif calibration") {
+            if (strcmp(option, "Vérif calibration") == 0) {
               id(orp_ezo).get_calibration();
             }  
-            if (option.has_value() && option.value() == "Calibration @ 225 mV ") {
+            if (strcmp(option, "Calibration @ 225 mV ") == 0) {
               id(orp_ezo).send_custom("Cal,225");
             }
-            if (option.has_value() && option.value() == "Supr Calibration") {
+            if (strcmp(option, "Supr Calibration") == 0) {
               id(orp_ezo).clear_calibration();
             }
             // else {

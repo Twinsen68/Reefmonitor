@@ -125,36 +125,36 @@ button:
     on_press:
       then:
         - lambda: |-
-            const auto option = id(select_command_ph).current_option();
-            if (option.has_value() && option.value() == "Lire") {
+            const char *option = id(select_command_ph).current_option();
+            if (strcmp(option, "Lire") == 0) {
               id(ph_ezo).send_custom("R");
             }
             // Get Device Firmware Version
-            if (option.has_value() && option.value() == "Information") {
+            if (strcmp(option, "Information") == 0) {
               id(ph_ezo).get_device_information();
             }
-            if (option.has_value() && option.value() == "Status") {
+            if (strcmp(option, "Status") == 0) {
               id(ph_ezo).send_custom("Status");
             }
-            if (option.has_value() && option.value() == "Obt courbe") {
+            if (strcmp(option, "Obt courbe") == 0) {
               id(ph_ezo).get_slope();
             }
-            if (option.has_value() && option.value() == "Vérif calibration") {
+            if (strcmp(option, "Vérif calibration") == 0) {
               id(ph_ezo).get_calibration();
             }  
-            if (option.has_value() && option.value() == "Calibrate @ MOY = 7 ") {
+            if (strcmp(option, "Calibrate @ MOY = 7 ") == 0) {
               id(ph_ezo).set_calibration_point_mid(7.00);
             }
-            if (option.has_value() && option.value() == "Calibrate @ BASSE = 4 ") {
+            if (strcmp(option, "Calibrate @ BASSE = 4 ") == 0) {
               id(ph_ezo).set_calibration_point_low(4.00);
             }
-            if (option.has_value() && option.value() == "Calibrate @ HAUTE = 10 ") {
+            if (strcmp(option, "Calibrate @ HAUTE = 10 ") == 0) {
               id(ph_ezo).set_calibration_point_high(10.00);
             }
-            if (option.has_value() && option.value() == "Calibrate @ HAUTE = 10.01 ") {
+            if (strcmp(option, "Calibrate @ HAUTE = 10.01 ") == 0) {
               id(ph_ezo).set_calibration_point_high(10.01);
             }
-            if (option.has_value() && option.value() == "Calibrate CLEAR ") {
+            if (strcmp(option, "Calibrate CLEAR ") == 0) {
               id(ph_ezo).clear_calibration();
             }
             // if (id(select_command_ph).state == "Reset EZO ") {
